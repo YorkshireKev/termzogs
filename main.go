@@ -1,3 +1,4 @@
+// Package main starts TermZogs and manages terminal input and rendering.
 package main
 
 import (
@@ -12,6 +13,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// main reports startup or runtime errors to stderr.
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -19,6 +21,7 @@ func main() {
 	}
 }
 
+// run owns the terminal screen and processes input until the user exits.
 func run() error {
 	screen, err := tcell.NewScreen()
 	if err != nil {
@@ -35,6 +38,7 @@ func run() error {
 	stopEvents := make(chan struct{})
 	defer close(stopEvents)
 	events := make(chan tcell.Event, 16)
+	// Keep event polling independent so initial rendering is not blocked.
 	go screen.ChannelEvents(events, stopEvents)
 	ticker := time.NewTicker(time.Second / 30)
 	defer ticker.Stop()
@@ -69,6 +73,7 @@ func run() error {
 	}
 }
 
+// handleKey maps quit and movement keys to game actions.
 func handleKey(current *game.Game, event *tcell.EventKey) bool {
 	if event.Key() == tcell.KeyCtrlC || event.Key() == tcell.KeyEscape || event.Rune() == 'q' || event.Rune() == 'Q' {
 		return true

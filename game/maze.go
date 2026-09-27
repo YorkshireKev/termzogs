@@ -1,23 +1,29 @@
 package game
 
+// This file defines maze data, generation, and tile queries.
+
 import (
 	"math/rand"
 	"time"
 )
 
 const (
+	// MazeWidth and MazeHeight define the fixed maze dimensions.
 	MazeWidth  = 62
 	MazeHeight = 62
 )
 
+// Point identifies a cell in the maze.
 type Point struct {
 	X int
 	Y int
 }
 
+// Tile identifies the contents of a maze cell.
 type Tile uint8
 
 const (
+	// Wall and Floor represent empty maze geometry; the remaining values are entities.
 	Wall Tile = iota
 	Floor
 	Sword
@@ -26,16 +32,19 @@ const (
 	Treasure
 )
 
+// Maze stores the cell grid and the starting and treasure locations.
 type Maze struct {
 	Tiles    [MazeHeight][MazeWidth]Tile
 	Start    Point
 	Treasure Point
 }
 
+// GenerateMaze creates a maze using a time-based random seed.
 func GenerateMaze() *Maze {
 	return GenerateMazeWithSeed(time.Now().UnixNano())
 }
 
+// GenerateMazeWithSeed creates a reproducible maze and places its entities.
 func GenerateMazeWithSeed(seed int64) *Maze {
 	maze := &Maze{Start: Point{X: 1, Y: 1}}
 	rng := rand.New(rand.NewSource(seed))
@@ -50,6 +59,7 @@ func GenerateMazeWithSeed(seed int64) *Maze {
 	maze.Tiles[maze.Start.Y][maze.Start.X] = Floor
 
 	directions := [...]Point{{X: 0, Y: -2}, {X: 2, Y: 0}, {X: 0, Y: 2}, {X: -2, Y: 0}}
+	// Carve between unvisited cells while backtracking when a cell has no options.
 	for len(stack) > 0 {
 		current := stack[len(stack)-1]
 		neighbors := make([]Point, 0, len(directions))
@@ -93,6 +103,7 @@ func GenerateMazeWithSeed(seed int64) *Maze {
 	return maze
 }
 
+// TileAt returns the cell contents, treating out-of-bounds coordinates as walls.
 func (maze *Maze) TileAt(point Point) Tile {
 	if point.X < 0 || point.X >= MazeWidth || point.Y < 0 || point.Y >= MazeHeight {
 		return Wall
@@ -100,6 +111,7 @@ func (maze *Maze) TileAt(point Point) Tile {
 	return maze.Tiles[point.Y][point.X]
 }
 
+// IsWalkable reports whether a point can be entered by the player.
 func (maze *Maze) IsWalkable(point Point) bool {
 	return maze.TileAt(point) != Wall
 }

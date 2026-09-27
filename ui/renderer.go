@@ -1,5 +1,7 @@
 package ui
 
+// This file draws the player-centered maze viewport and status line.
+
 import (
 	"fmt"
 
@@ -8,10 +10,13 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// ViewportSize is the width and height of the local gameplay view.
 const ViewportSize = 15
 
+// Renderer draws game state onto a tcell screen.
 type Renderer struct{}
 
+// Draw paints the local viewport and player status.
 func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 	screenWidth, screenHeight := screen.Size()
 	screen.Clear()
@@ -51,6 +56,7 @@ func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 	}
 }
 
+// tileAppearance maps a maze tile to its display character and style.
 func tileAppearance(tile game.Tile) (rune, tcell.Style) {
 	switch tile {
 	case game.Floor:
@@ -68,6 +74,7 @@ func tileAppearance(tile game.Tile) (rune, tcell.Style) {
 	}
 }
 
+// drawText writes a clipped line of text starting at the given screen position.
 func drawText(screen tcell.Screen, x, y, screenWidth int, text string, style tcell.Style) {
 	for _, character := range text {
 		if x >= screenWidth {

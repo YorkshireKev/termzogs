@@ -1,5 +1,7 @@
+// Package game contains player state and maze interaction rules.
 package game
 
+// Player tracks the explorer's position, inventory, and moves.
 type Player struct {
 	Position    Point
 	HasSword    bool
@@ -7,16 +9,19 @@ type Player struct {
 	Moves       int
 }
 
+// Game combines the maze with the current player state.
 type Game struct {
 	Maze   *Maze
 	Player Player
 }
 
+// NewGame generates a maze and places the player at its start.
 func NewGame() *Game {
 	maze := GenerateMaze()
 	return &Game{Maze: maze, Player: Player{Position: maze.Start}}
 }
 
+// Move advances the player into a walkable tile and collects eligible items.
 func (game *Game) Move(dx, dy int) {
 	next := Point{X: game.Player.Position.X + dx, Y: game.Player.Position.Y + dy}
 	if !game.Maze.IsWalkable(next) {

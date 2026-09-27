@@ -1,7 +1,10 @@
 package game
 
+// This file verifies maze boundaries, connectivity, and generated entity counts.
+
 import "testing"
 
+// TestGeneratedMazeHasClosedBoundaryAndConnectedPassages checks maze invariants.
 func TestGeneratedMazeHasClosedBoundaryAndConnectedPassages(t *testing.T) {
 	maze := GenerateMazeWithSeed(7)
 	for x := 0; x < MazeWidth; x++ {
