@@ -1,0 +1,105 @@
+package game
+
+import (
+	"math/rand"
+	"time"
+)
+
+const (
+	MazeWidth  = 62
+	MazeHeight = 62
+)
+
+type Point struct {
+	X int
+	Y int
+}
+
+type Tile uint8
+
+const (
+	Wall Tile = iota
+	Floor
+	Sword
+	Prisoner
+	Monster
+	Treasure
+)
+
+type Maze struct {
+	Tiles    [MazeHeight][MazeWidth]Tile
+	Start    Point
+	Treasure Point
+}
+
+func GenerateMaze() *Maze {
+	return GenerateMazeWithSeed(time.Now().UnixNano())
+}
+
+func GenerateMazeWithSeed(seed int64) *Maze {
+	maze := &Maze{Start: Point{X: 1, Y: 1}}
+	rng := rand.New(rand.NewSource(seed))
+
+	type cell struct {
+		point   Point
+		visited bool
+	}
+	visited := [MazeHeight][MazeWidth]bool{}
+	stack := []Point{maze.Start}
+	visited[maze.Start.Y][maze.Start.X] = true
+	maze.Tiles[maze.Start.Y][maze.Start.X] = Floor
+
+	directions := [...]Point{{X: 0, Y: -2}, {X: 2, Y: 0}, {X: 0, Y: 2}, {X: -2, Y: 0}}
+	for len(stack) > 0 {
+		current := stack[len(stack)-1]
+		neighbors := make([]Point, 0, len(directions))
+		for _, direction := range directions {
+			next := Point{X: current.X + direction.X, Y: current.Y + direction.Y}
+			if next.X > 0 && next.X < MazeWidth-1 && next.Y > 0 && next.Y < MazeHeight-1 && !visited[next.Y][next.X] {
+				neighbors = append(neighbors, next)
+			}
+		}
+
+		if len(neighbors) == 0 {
+			stack = stack[:len(stack)-1]
+			continue
+		}
+
+		next := neighbors[rng.Intn(len(neighbors))]
+		between := Point{X: (current.X + next.X) / 2, Y: (current.Y + next.Y) / 2}
+		maze.Tiles[between.Y][between.X] = Floor
+		maze.Tiles[next.Y][next.X] = Floor
+		visited[next.Y][next.X] = true
+		stack = append(stack, next)
+	}
+
+	// The treasure sits on the central room of the maze.
+	maze.Treasure = Point{X: MazeWidth / 2, Y: MazeHeight / 2}
+	maze.Tiles[maze.Treasure.Y][maze.Treasure.X] = Treasure
+	place := func(tile Tile, count int) {
+		for placed := 0; placed < count; {
+			point := Point{X: 1 + rng.Intn(MazeWidth-2), Y: 1 + rng.Intn(MazeHeight-2)}
+			if point == maze.Start || point == maze.Treasure || maze.Tiles[point.Y][point.X] != Floor {
+				continue
+			}
+			maze.Tiles[point.Y][point.X] = tile
+			placed++
+		}
+	}
+	place(Sword, 12)
+	place(Prisoner, 5)
+	place(Monster, 18)
+
+	return maze
+}
+
+func (maze *Maze) TileAt(point Point) Tile {
+	if point.X < 0 || point.X >= MazeWidth || point.Y < 0 || point.Y >= MazeHeight {
+		return Wall
+	}
+	return maze.Tiles[point.Y][point.X]
+}
+
+func (maze *Maze) IsWalkable(point Point) bool {
+	return maze.TileAt(point) != Wall
+}
