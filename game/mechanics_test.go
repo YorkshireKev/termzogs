@@ -80,16 +80,19 @@ func TestPrisonerInteractionCostsEnergyAndGuides(t *testing.T) {
 	current.Player.Position = Point{X: 2, Y: 2}
 	current.Maze.Tiles[2][3] = Prisoner
 
-	current.Interact()
+	current.Move(1, 0)
 	if current.Player.Energy != InitialEnergy-15 || current.GuidanceTicks != 15 || len(current.GuidancePath) == 0 {
 		t.Fatalf("interaction energy=%d ticks=%d path length=%d", current.Player.Energy, current.GuidanceTicks, len(current.GuidancePath))
+	}
+	if current.Player.Position != (Point{X: 2, Y: 2}) {
+		t.Fatalf("player moved into prisoner wall cell: %v", current.Player.Position)
 	}
 	if current.GuidancePath[len(current.GuidancePath)-1] != current.Maze.Treasure {
 		t.Fatal("guidance path does not end at the treasure")
 	}
 
 	current.Player.HasTreasure = true
-	current.Interact()
+	current.Move(1, 0)
 	if current.GuidancePath[len(current.GuidancePath)-1] != current.Maze.Start {
 		t.Fatal("guidance path does not end at the exit while carrying treasure")
 	}

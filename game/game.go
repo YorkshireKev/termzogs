@@ -57,6 +57,10 @@ func (current *Game) Move(dx, dy int) {
 		return
 	}
 	next := Point{X: current.Player.Position.X + dx, Y: current.Player.Position.Y + dy}
+	if current.Maze.TileAt(next) == Prisoner {
+		current.Interact()
+		return
+	}
 	if !current.Maze.IsWalkable(next) {
 		return
 	}

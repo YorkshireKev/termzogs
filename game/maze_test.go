@@ -36,10 +36,22 @@ func TestGeneratedMazeHasClosedBoundaryAndConnectedPassages(t *testing.T) {
 	counts := map[Tile]int{}
 	for y, row := range maze.Tiles {
 		for x, tile := range row {
-			if tile != Wall && !seen[Point{X: x, Y: y}] {
+			if maze.IsWalkable(Point{X: x, Y: y}) && !seen[Point{X: x, Y: y}] {
 				t.Fatalf("walkable tile at (%d, %d) is unreachable", x, y)
 			}
 			counts[tile]++
+			if tile == Prisoner {
+				point := Point{X: x, Y: y}
+				openNeighbors := 0
+				for _, direction := range directions {
+					if maze.IsWalkable(Point{X: x + direction.X, Y: y + direction.Y}) {
+						openNeighbors++
+					}
+				}
+				if maze.IsWalkable(point) || openNeighbors != 1 {
+					t.Errorf("prisoner at (%d, %d) is walkable or not in a wall niche", x, y)
+				}
+			}
 			if tile == Food {
 				openNeighbors := 0
 				for _, direction := range directions {
@@ -54,7 +66,7 @@ func TestGeneratedMazeHasClosedBoundaryAndConnectedPassages(t *testing.T) {
 			}
 		}
 	}
-	for tile, want := range map[Tile]int{Sword: 12, Prisoner: 5, Monster: 18, Treasure: 1} {
+	for tile, want := range map[Tile]int{Sword: 12, Prisoner: 35, Monster: 18, Treasure: 1} {
 		if counts[tile] != want {
 			t.Errorf("tile %d count = %d, want %d", tile, counts[tile], want)
 		}

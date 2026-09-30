@@ -94,11 +94,41 @@ func GenerateMazeWithSeed(seed int64) *Maze {
 		}
 	}
 	place(Sword, 12)
-	place(Prisoner, 5)
+	placePrisoners(rng, maze, 35)
 	place(Monster, 18)
 	placeFood(rng, maze)
 
 	return maze
+}
+
+// placePrisoners hides prisoners in wall cells adjoining a single corridor.
+func placePrisoners(rng *rand.Rand, maze *Maze, count int) {
+	niches := make([]Point, 0)
+	directions := [...]Point{{X: 0, Y: -1}, {X: 1, Y: 0}, {X: 0, Y: 1}, {X: -1, Y: 0}}
+	for y := 1; y < MazeHeight-1; y++ {
+		for x := 1; x < MazeWidth-1; x++ {
+			if maze.Tiles[y][x] != Wall {
+				continue
+			}
+			openNeighbors := 0
+			for _, direction := range directions {
+				if maze.IsWalkable(Point{X: x + direction.X, Y: y + direction.Y}) {
+					openNeighbors++
+				}
+			}
+			if openNeighbors == 1 {
+				niches = append(niches, Point{X: x, Y: y})
+			}
+		}
+	}
+
+	if count > len(niches) {
+		count = len(niches)
+	}
+	for _, index := range rng.Perm(len(niches))[:count] {
+		point := niches[index]
+		maze.Tiles[point.Y][point.X] = Prisoner
+	}
 }
 
 // placeFood scatters food across available maze dead ends.
@@ -112,7 +142,7 @@ func placeFood(rng *rand.Rand, maze *Maze) {
 			}
 			openNeighbors := 0
 			for _, direction := range [...]Point{{X: 0, Y: -1}, {X: 1, Y: 0}, {X: 0, Y: 1}, {X: -1, Y: 0}} {
-				if maze.TileAt(Point{X: x + direction.X, Y: y + direction.Y}) != Wall {
+				if maze.IsWalkable(Point{X: x + direction.X, Y: y + direction.Y}) {
 					openNeighbors++
 				}
 			}
@@ -142,5 +172,6 @@ func (maze *Maze) TileAt(point Point) Tile {
 
 // IsWalkable reports whether a point can be entered by the player.
 func (maze *Maze) IsWalkable(point Point) bool {
-	return maze.TileAt(point) != Wall
+	tile := maze.TileAt(point)
+	return tile != Wall && tile != Prisoner
 }

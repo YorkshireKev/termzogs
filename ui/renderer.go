@@ -43,15 +43,12 @@ func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 			if index >= 10 {
 				break
 			}
-			from := point
-			to := point
-			if index == 0 {
-				from = current.Player.Position
-			} else {
-				from = current.GuidancePath[index-1]
-			}
+			from, to := current.Player.Position, point
 			if index+1 < len(current.GuidancePath) {
+				from = point
 				to = current.GuidancePath[index+1]
+			} else if index > 0 {
+				from = current.GuidancePath[index-1]
 			} else {
 				to = point
 			}

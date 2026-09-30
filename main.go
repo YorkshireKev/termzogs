@@ -101,9 +101,6 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 	}
 
 	switch event.Rune() {
-	case 'e', 'E':
-		current.Interact()
-		return false
 	case 'D':
 		current.DropItem()
 		return false
