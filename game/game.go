@@ -74,7 +74,7 @@ func (current *Game) Move(dx, dy int) {
 		if current.Player.HasTreasure {
 			current.PendingSwap = true
 			current.StatusMessage = "Drop Treasure to pick up Sword? [Y/N]"
-		} else {
+		} else if !current.Player.HasSword {
 			current.Player.HasSword = true
 			current.Maze.Tiles[next.Y][next.X] = Floor
 		}

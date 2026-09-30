@@ -129,6 +129,25 @@ func TestDropItemLeavesItOnCurrentCell(t *testing.T) {
 	}
 }
 
+func TestCarriedSwordDoesNotConsumeAnotherSword(t *testing.T) {
+	current := NewGameWithSeed(18)
+	current.Player.HasSword = true
+	current.Maze.Tiles[1][2] = Sword
+	current.Maze.Tiles[1][3] = Floor
+
+	current.Move(1, 0)
+	if !current.Player.HasSword || current.Maze.TileAt(Point{X: 2, Y: 1}) != Sword {
+		t.Fatal("walking over another sword consumed it while already armed")
+	}
+
+	current.Move(1, 0)
+	current.DropItem()
+	current.Move(-1, 0)
+	if !current.Player.HasSword || current.Maze.TileAt(Point{X: 2, Y: 1}) != Floor {
+		t.Fatal("uncollected sword could not be picked up after dropping the carried sword")
+	}
+}
+
 func TestFindPathReturnsOrderedShortestRoute(t *testing.T) {
 	maze := &Maze{Start: Point{X: 1, Y: 1}}
 	for y := 1; y <= 3; y++ {
