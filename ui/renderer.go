@@ -8,10 +8,11 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-// ViewportSize is the width and height of the local gameplay view.
-const ViewportSize = 10
-
 const (
+	ViewportWidth          = 10
+	ViewportHeight         = 6
+	ViewportCellWidth      = 6
+	ViewportCellHeight     = 3
 	ExpandedViewportWidth  = 70
 	ExpandedViewportHeight = 20
 )
@@ -30,22 +31,84 @@ func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 		return
 	}
 
-	viewWidth := ViewportSize
-	viewHeight := ViewportSize
 	if current.ExpandedView {
-		viewWidth = ExpandedViewportWidth
-		viewHeight = ExpandedViewportHeight
+		drawExpandedViewport(screen, current)
+	} else {
+		drawLocalViewport(screen, current)
 	}
+	DrawHUD(screen, current)
+}
+
+func drawExpandedViewport(screen tcell.Screen, current *game.Game) {
+	screenWidth, screenHeight := screen.Size()
+	viewWidth := ExpandedViewportWidth
+	viewHeight := ExpandedViewportHeight
 	if viewWidth > screenWidth {
 		viewWidth = screenWidth
 	}
 	if viewHeight > screenHeight {
 		viewHeight = screenHeight
 	}
+	if viewHeight > screenHeight-3 {
+		viewHeight = screenHeight - 3
+	}
+	if viewHeight <= 0 {
+		return
+	}
 	viewLeft := (screenWidth - viewWidth) / 2
-	viewTop := (screenHeight - viewHeight) / 2
+	viewTop := (screenHeight-viewHeight)/2 - 1
+	if viewTop < 0 {
+		viewTop = 0
+	}
 	worldLeft := current.Player.Position.X - viewWidth/2
 	worldTop := current.Player.Position.Y - viewHeight/2
+	guidance := guidanceFor(current)
+
+	for y := 0; y < viewHeight; y++ {
+		for x := 0; x < viewWidth; x++ {
+			world := game.Point{X: worldLeft + x, Y: worldTop + y}
+			character, style := displayAt(current, world, guidance)
+			screen.SetContent(viewLeft+x, viewTop+y, character, nil, style)
+		}
+	}
+}
+
+func drawLocalViewport(screen tcell.Screen, current *game.Game) {
+	screenWidth, screenHeight := screen.Size()
+	viewWidth := ViewportWidth
+	viewHeight := ViewportHeight
+	if screenWidth/ViewportCellWidth < viewWidth {
+		viewWidth = screenWidth / ViewportCellWidth
+	}
+	playAreaHeight := screenHeight - 2
+	if playAreaHeight/ViewportCellHeight < viewHeight {
+		viewHeight = playAreaHeight / ViewportCellHeight
+	}
+	if viewWidth <= 0 || viewHeight <= 0 {
+		return
+	}
+	drawWidth := viewWidth * ViewportCellWidth
+	drawHeight := viewHeight * ViewportCellHeight
+	viewLeft := (screenWidth - drawWidth) / 2
+	viewTop := (playAreaHeight - drawHeight) / 2
+	worldLeft := current.Player.Position.X - viewWidth/2
+	worldTop := current.Player.Position.Y - viewHeight/2
+	guidance := guidanceFor(current)
+
+	for y := 0; y < viewHeight; y++ {
+		for x := 0; x < viewWidth; x++ {
+			world := game.Point{X: worldLeft + x, Y: worldTop + y}
+			character, style := displayAt(current, world, guidance)
+			for blockY := 0; blockY < ViewportCellHeight; blockY++ {
+				for blockX := 0; blockX < ViewportCellWidth; blockX++ {
+					screen.SetContent(viewLeft+x*ViewportCellWidth+blockX, viewTop+y*ViewportCellHeight+blockY, character, nil, style)
+				}
+			}
+		}
+	}
+}
+
+func guidanceFor(current *game.Game) map[game.Point]rune {
 	guidance := make(map[game.Point]rune)
 	if current.GuidanceTicks > 0 {
 		for index, point := range current.GuidancePath {
@@ -64,25 +127,20 @@ func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 			guidance[point] = directionArrow(from, to)
 		}
 	}
+	return guidance
+}
 
-	for y := 0; y < viewHeight; y++ {
-		for x := 0; x < viewWidth; x++ {
-			world := game.Point{X: worldLeft + x, Y: worldTop + y}
-			tile := current.Maze.TileAt(world)
-			character, style := tileAppearance(tile)
-			if arrow, ok := guidance[world]; ok {
-				character = arrow
-				style = tcell.StyleDefault.Foreground(tcell.ColorAqua).Bold(true)
-			}
-			if world == current.Player.Position {
-				character = '@'
-				style = tcell.StyleDefault.Foreground(tcell.ColorYellow).Bold(true)
-			}
-			screen.SetContent(viewLeft+x, viewTop+y, character, nil, style)
-		}
+func displayAt(current *game.Game, world game.Point, guidance map[game.Point]rune) (rune, tcell.Style) {
+	character, style := tileAppearance(current.Maze.TileAt(world))
+	if arrow, ok := guidance[world]; ok {
+		character = arrow
+		style = tcell.StyleDefault.Foreground(tcell.ColorAqua).Bold(true)
 	}
-
-	DrawHUD(screen, current)
+	if world == current.Player.Position {
+		character = '@'
+		style = tcell.StyleDefault.Foreground(tcell.ColorYellow).Bold(true)
+	}
+	return character, style
 }
 
 // tileAppearance maps a maze tile to its display character and style.

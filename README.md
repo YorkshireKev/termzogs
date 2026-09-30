@@ -39,7 +39,7 @@ The expanded view is 70 columns by 20 rows, clipped to the terminal size. Openin
 ## Game Rules
 
 - The generated maze is 62 columns by 42 rows, with randomized shortcuts and open rooms connecting its branching corridors. It contains one treasure near the center, 12 swords, 35 prisoners in wall niches, and 18 Zogs. Two Zogs guard the main start-to-treasure route, each preceded by a sword; other Zogs and swords are placed off-route. Food supplies cover the main route and its armed fights, with extra supplies for long routes.
-- The local gameplay view is 10 by 10 cells and follows the player.
+- The local gameplay view follows the player across 10 by 6 cells. Each cell is rendered as a 6 by 3 block of its tile character; the expanded map view remains unchanged.
 - Players start with 200 energy and can hold up to 300 on typical mazes. Capacity scales up for unusually long routes to ensure the guaranteed supplies can cover the return trip. Each successful movement costs 1 energy. Reaching 0 energy causes defeat.
 - Collecting food consumes it and restores 50 energy, up to the current energy capacity.
 - The player can carry a sword or the treasure, but not both. Walking over a sword while carrying the treasure prompts for confirmation. Y drops the treasure and takes the sword; N keeps the treasure. A sword encountered while already carrying a sword remains in the maze.
