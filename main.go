@@ -78,7 +78,7 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 	if current.ExpandedView {
 		current.ExpandedView = false
 		current.SetStatusMessage("")
-		if event.Rune() == 'v' || event.Rune() == 'V' {
+		if event.Rune() == 'v' || event.Rune() == 'V' || event.Rune() == 'm' || event.Rune() == 'M' {
 			return false
 		}
 	}
@@ -108,7 +108,7 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 	}
 
 	switch event.Rune() {
-	case 'v', 'V':
+	case 'v', 'V', 'm', 'M':
 		current.ToggleMazeView()
 		return false
 	case 'D':

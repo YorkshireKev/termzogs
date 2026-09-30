@@ -26,7 +26,7 @@ go test ./...
 | Key | Action |
 | --- | --- |
 | Arrow keys or lowercase WASD (`w`, `a`, `s`, `d`) | Move one cell |
-| V | Open the expanded maze view |
+| V or M | Open the expanded maze view |
 | Uppercase D (Shift+D) | Drop the held sword or treasure on the current cell |
 | Y / N | Accept or decline dropping treasure to take a sword |
 | Q or Escape | Quit |

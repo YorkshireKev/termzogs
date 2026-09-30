@@ -3,8 +3,9 @@ package main
 import (
 	"testing"
 
-	"github.com/gdamore/tcell/v2"
 	"termzogs/game"
+
+	"github.com/gdamore/tcell/v2"
 )
 
 func TestNextMovementKeyDismissesExpandedViewAndMoves(t *testing.T) {
@@ -22,13 +23,19 @@ func TestNextMovementKeyDismissesExpandedViewAndMoves(t *testing.T) {
 	}
 }
 
-func TestVKeyDismissesExpandedViewWithoutReopeningOrCharging(t *testing.T) {
-	current := game.NewGameWithSeed(22)
-	current.Player.Energy = 80
-	current.ExpandedView = true
+func TestMapKeysOpenAndCloseExpandedView(t *testing.T) {
+	for _, key := range []rune{'v', 'V', 'm', 'M'} {
+		current := game.NewGameWithSeed(22)
+		initialEnergy := current.Player.Energy
 
-	handleKey(current, tcell.NewEventKey(tcell.KeyRune, 'v', 0))
-	if current.ExpandedView || current.Player.Energy != 80 {
-		t.Fatalf("expanded=%t energy=%d, want closed view without another charge", current.ExpandedView, current.Player.Energy)
+		handleKey(current, tcell.NewEventKey(tcell.KeyRune, key, 0))
+		if !current.ExpandedView || current.Player.Energy != initialEnergy-game.MazeViewCost {
+			t.Fatalf("key %q: expanded=%t energy=%d, want map open and one charge", key, current.ExpandedView, current.Player.Energy)
+		}
+
+		handleKey(current, tcell.NewEventKey(tcell.KeyRune, key, 0))
+		if current.ExpandedView || current.Player.Energy != initialEnergy-game.MazeViewCost {
+			t.Fatalf("key %q: expanded=%t energy=%d, want map closed without another charge", key, current.ExpandedView, current.Player.Energy)
+		}
 	}
 }
