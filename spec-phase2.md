@@ -21,10 +21,10 @@ termzogs/
 ## 2. Expanded Game State Rules
 
 ### A. Energy & Step System (`game/energy.go`)
-- **Initial Energy:** Player starts with **200 Units** (Max capacity: 300).
+- **Initial Energy:** Player starts with **200 Units** (Max capacity: 300 on typical runs; capacity scales for unusually long routes).
 - **Movement Cost:** Every movement step costs **1 Energy Unit**.
-- **Food Placement:** 
-  - Scatter 8–12 Food items (`%`) in maze dead-ends.
+- **Food Placement:**
+   - Place food in maze dead-ends and along the start-to-treasure route as needed to fund the return trip and two armed Zog encounters.
   - Picking up Food restores **+50 Energy** (capped at Max capacity).
 - **Zero Energy State:** When Energy reaches 0, player dies immediately (**Defeat State**).
 
@@ -46,6 +46,8 @@ Triggered whenever the player enters a cell occupied by a Zog (`M`):
    - **Victory (50% Chance):** Player defeats the Zog, but suffers a severe **-40 Energy** penalty.
    - **Defeat (50% Chance):** Player dies immediately (**Defeat State**).
    - **UI Output:** Status message: *"Desperate fight! You defeated the Zog but lost 40 Energy!"* or *"The Zog overpowered you!"*
+
+- **Route Encounters:** Place two Zogs on the start-to-treasure route, each immediately after a sword pickup. Place remaining Zogs and swords off that route.
 
 ### D. Prisoner Guidance System (`game/pathfinding.go`)
 When the player moves adjacent to a Prisoner (`P`) and presses `E` (Interact):

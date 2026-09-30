@@ -36,7 +36,7 @@ termzogs/
 
 ### 1. The Maze Engine (`game/maze.go`)
 - **Dimensions:** 62x62 cell grid surrounded by outer wall boundaries.
-- **Generation:** Recursive Backtracking algorithm to ensure every point in the maze is reachable (a "perfect maze").
+- **Generation:** Recursive backtracking creates the connected maze; randomized extra passages and small open rooms add alternate routes while preserving branches and dead ends.
 - **Key Entities Placed at Generation:**
   - **Start Coordinate:** Edge cell at (1, 1).
   - **Treasure Chest (`$`):** Placed near the center of the maze.

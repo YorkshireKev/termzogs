@@ -32,7 +32,12 @@ func newGame(seed int64) *Game {
 // Start generates the maze and initializes the player for a new run.
 func (current *Game) Start() {
 	current.Maze = GenerateMazeWithSeed(current.seed)
-	current.Player = Player{Position: current.Maze.Start, Energy: InitialEnergy, MaxEnergy: MaxEnergy}
+	path, _ := current.Maze.FindPath(current.Maze.Start, current.Maze.Treasure)
+	capacity := MaxEnergy
+	if len(path)+2 > capacity {
+		capacity = len(path) + 2
+	}
+	current.Player = Player{Position: current.Maze.Start, Energy: InitialEnergy, MaxEnergy: capacity}
 	current.State = StatePlaying
 	current.SetStatusMessage("")
 	current.ZogsSlain = 0

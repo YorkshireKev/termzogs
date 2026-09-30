@@ -38,10 +38,10 @@ The expanded view is 70 columns by 20 rows, clipped to the terminal size. Openin
 
 ## Game Rules
 
-- The generated maze is 62 columns by 42 rows. It contains one treasure near the center, 12 swords, 35 prisoners in wall niches, 18 Zogs, and 8-12 food items in dead ends.
+- The generated maze is 62 columns by 42 rows, with randomized shortcuts and open rooms connecting its branching corridors. It contains one treasure near the center, 12 swords, 35 prisoners in wall niches, and 18 Zogs. Two Zogs guard the main start-to-treasure route, each preceded by a sword; other Zogs and swords are placed off-route. Food supplies cover the main route and its armed fights, with extra supplies for long routes.
 - The local gameplay view is 10 by 10 cells and follows the player.
-- Players start with 200 energy and can hold up to 300. Each successful movement costs 1 energy. Reaching 0 energy causes defeat.
-- Collecting food consumes it and restores 50 energy, up to the 300-energy maximum.
+- Players start with 200 energy and can hold up to 300 on typical mazes. Capacity scales up for unusually long routes to ensure the guaranteed supplies can cover the return trip. Each successful movement costs 1 energy. Reaching 0 energy causes defeat.
+- Collecting food consumes it and restores 50 energy, up to the current energy capacity.
 - The player can carry a sword or the treasure, but not both. Walking over a sword while carrying the treasure prompts for confirmation. Y drops the treasure and takes the sword; N keeps the treasure. A sword encountered while already carrying a sword remains in the maze.
 - Dropping an item leaves it on the player's current cell. A sword prevents treasure pickup until it is dropped.
 - Fighting a Zog while armed defeats it, breaks the sword, and costs 5 additional energy. Without a sword, combat is a 50/50 roll: a win costs 40 additional energy; a loss causes immediate defeat. The movement into the Zog's cell also costs 1 energy.

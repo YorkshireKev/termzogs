@@ -79,26 +79,104 @@ func GenerateMazeWithSeed(seed int64) *Maze {
 		visited[next.Y][next.X] = true
 		stack = append(stack, next)
 	}
+	addAlternatePassages(rng, maze)
 
 	// The treasure sits on the central room of the maze.
 	maze.Treasure = Point{X: MazeWidth / 2, Y: MazeHeight / 2}
 	maze.Tiles[maze.Treasure.Y][maze.Treasure.X] = Treasure
+	path, _ := maze.FindPath(maze.Start, maze.Treasure)
+	safeRoute := make(map[Point]bool, len(path))
+	for _, point := range path {
+		safeRoute[point] = true
+	}
 	place := func(tile Tile, count int) {
 		for placed := 0; placed < count; {
 			point := Point{X: 1 + rng.Intn(MazeWidth-2), Y: 1 + rng.Intn(MazeHeight-2)}
-			if point == maze.Start || point == maze.Treasure || maze.Tiles[point.Y][point.X] != Floor {
+			if point == maze.Start || point == maze.Treasure || safeRoute[point] || maze.Tiles[point.Y][point.X] != Floor {
 				continue
 			}
 			maze.Tiles[point.Y][point.X] = tile
 			placed++
 		}
 	}
-	place(Sword, 12)
+	place(Sword, 10)
 	placePrisoners(rng, maze, 35)
-	place(Monster, 18)
-	placeFood(rng, maze)
+	placeFood(rng, maze, path, 2)
+	placeRouteEncounters(maze, path)
+	place(Monster, 16)
 
 	return maze
+}
+
+// addAlternatePassages adds shortcuts and small open rooms to the carved maze.
+func addAlternatePassages(rng *rand.Rand, maze *Maze) {
+	candidates := make([]Point, 0)
+	for y := 1; y < MazeHeight-1; y++ {
+		for x := 1; x < MazeWidth-1; x++ {
+			point := Point{X: x, Y: y}
+			if maze.TileAt(point) != Wall {
+				continue
+			}
+			openNeighbors := 0
+			for _, direction := range [...]Point{{X: 0, Y: -1}, {X: 1, Y: 0}, {X: 0, Y: 1}, {X: -1, Y: 0}} {
+				if maze.IsWalkable(Point{X: x + direction.X, Y: y + direction.Y}) {
+					openNeighbors++
+				}
+			}
+			if openNeighbors >= 2 {
+				candidates = append(candidates, point)
+			}
+		}
+	}
+
+	shortcutCount := 18
+	if shortcutCount > len(candidates) {
+		shortcutCount = len(candidates)
+	}
+	for _, index := range rng.Perm(len(candidates))[:shortcutCount] {
+		point := candidates[index]
+		maze.Tiles[point.Y][point.X] = Floor
+	}
+
+	for area := 0; area < 3; area++ {
+		left := 2 + rng.Intn(MazeWidth-5)
+		top := 2 + rng.Intn(MazeHeight-5)
+		for y := top; y < top+3; y++ {
+			for x := left; x < left+3; x++ {
+				maze.Tiles[y][x] = Floor
+			}
+		}
+	}
+}
+
+// placeRouteEncounters puts two armed encounters on the main route.
+func placeRouteEncounters(maze *Maze, path []Point) {
+	used := make(map[Point]bool, 4)
+	for _, target := range []int{1, len(path) / 2} {
+		bestIndex := -1
+		bestDistance := len(path)
+		for index := 0; index < len(path)-1; index++ {
+			if maze.TileAt(path[index]) != Floor || maze.TileAt(path[index+1]) != Floor || used[path[index]] || used[path[index+1]] {
+				continue
+			}
+			distance := index - target
+			if distance < 0 {
+				distance = -distance
+			}
+			if distance < bestDistance {
+				bestIndex = index
+				bestDistance = distance
+			}
+		}
+		if bestIndex < 0 {
+			continue
+		}
+		sword, monster := path[bestIndex], path[bestIndex+1]
+		maze.Tiles[sword.Y][sword.X] = Sword
+		maze.Tiles[monster.Y][monster.X] = Monster
+		used[sword] = true
+		used[monster] = true
+	}
 }
 
 // placePrisoners hides prisoners in wall cells adjoining a single corridor.
@@ -131,8 +209,21 @@ func placePrisoners(rng *rand.Rand, maze *Maze, count int) {
 	}
 }
 
-// placeFood scatters food across available maze dead ends.
-func placeFood(rng *rand.Rand, maze *Maze) {
+// placeFood guarantees enough energy pickups for the route and its armed encounters.
+func placeFood(rng *rand.Rand, maze *Maze, path []Point, routeEncounters int) {
+	foodNeeded := (2*len(path) + 1 + 5*routeEncounters - InitialEnergy + 49) / 50
+	if foodNeeded < 0 {
+		foodNeeded = 0
+	}
+	for index := 0; index < foodNeeded; index++ {
+		pathIndex := (index + 1) * (len(path) - 2) / foodNeeded
+		if index == foodNeeded-1 {
+			pathIndex = len(path) - 2
+		}
+		point := path[pathIndex]
+		maze.Tiles[point.Y][point.X] = Food
+	}
+
 	deadEnds := make([]Point, 0)
 	for y := 1; y < MazeHeight-1; y++ {
 		for x := 1; x < MazeWidth-1; x++ {
@@ -153,6 +244,10 @@ func placeFood(rng *rand.Rand, maze *Maze) {
 	}
 
 	count := 8 + rng.Intn(5)
+	if count < foodNeeded {
+		count = foodNeeded
+	}
+	count -= foodNeeded
 	if count > len(deadEnds) {
 		count = len(deadEnds)
 	}

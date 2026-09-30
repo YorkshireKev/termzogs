@@ -7,6 +7,14 @@ import "testing"
 // TestGeneratedMazeHasClosedBoundaryAndConnectedPassages checks maze invariants.
 func TestGeneratedMazeHasClosedBoundaryAndConnectedPassages(t *testing.T) {
 	maze := GenerateMazeWithSeed(7)
+	route, found := maze.FindPath(maze.Start, maze.Treasure)
+	if !found {
+		t.Fatal("treasure is unreachable")
+	}
+	mainRoute := make(map[Point]bool, len(route))
+	for _, point := range route {
+		mainRoute[point] = true
+	}
 	for x := 0; x < MazeWidth; x++ {
 		if maze.Tiles[0][x] != Wall || maze.Tiles[MazeHeight-1][x] != Wall {
 			t.Fatalf("horizontal boundary opened at x=%d", x)
@@ -60,8 +68,8 @@ func TestGeneratedMazeHasClosedBoundaryAndConnectedPassages(t *testing.T) {
 						openNeighbors++
 					}
 				}
-				if openNeighbors != 1 {
-					t.Errorf("food at (%d, %d) has %d open neighbors, want dead end", x, y, openNeighbors)
+				if openNeighbors != 1 && !mainRoute[Point{X: x, Y: y}] {
+					t.Errorf("food at (%d, %d) has %d open neighbors and is not on the safe route", x, y, openNeighbors)
 				}
 			}
 		}
@@ -73,5 +81,104 @@ func TestGeneratedMazeHasClosedBoundaryAndConnectedPassages(t *testing.T) {
 	}
 	if counts[Food] < 8 || counts[Food] > 12 {
 		t.Errorf("food count = %d, want 8 through 12", counts[Food])
+	}
+}
+
+func TestGeneratedMazeHasAlternateRoutesAndOpenAreas(t *testing.T) {
+	for seed := int64(0); seed < 20; seed++ {
+		maze := GenerateMazeWithSeed(seed)
+		path, found := maze.FindPath(maze.Start, maze.Treasure)
+		if !found {
+			t.Fatalf("seed %d has no route to treasure", seed)
+		}
+
+		hasAlternateRoute := false
+		for _, point := range path[1 : len(path)-1] {
+			original := maze.Tiles[point.Y][point.X]
+			maze.Tiles[point.Y][point.X] = Wall
+			_, alternateFound := maze.FindPath(maze.Start, maze.Treasure)
+			maze.Tiles[point.Y][point.X] = original
+			if alternateFound {
+				hasAlternateRoute = true
+				break
+			}
+		}
+		if !hasAlternateRoute {
+			t.Fatalf("seed %d has no alternate route to treasure", seed)
+		}
+
+		hasOpenArea := false
+		for y := 1; y < MazeHeight-3 && !hasOpenArea; y++ {
+			for x := 1; x < MazeWidth-3 && !hasOpenArea; x++ {
+				allWalkable := true
+				for roomY := y; roomY < y+3; roomY++ {
+					for roomX := x; roomX < x+3; roomX++ {
+						if !maze.IsWalkable(Point{X: roomX, Y: roomY}) {
+							allWalkable = false
+						}
+					}
+				}
+				hasOpenArea = allWalkable
+			}
+		}
+		if !hasOpenArea {
+			t.Fatalf("seed %d has no open 3x3 area", seed)
+		}
+	}
+}
+
+func TestGeneratedSafeRouteCanBeCompletedWithEnergy(t *testing.T) {
+	for seed := int64(0); seed < 100; seed++ {
+		maze := GenerateMazeWithSeed(seed)
+		path, found := maze.FindPath(maze.Start, maze.Treasure)
+		if !found {
+			t.Fatalf("seed %d has no route to treasure", seed)
+		}
+
+		capacity := MaxEnergy
+		if len(path)+2 > capacity {
+			capacity = len(path) + 2
+		}
+		current := NewGameWithSeed(seed)
+		if current.Player.MaxEnergy != capacity {
+			t.Fatalf("seed %d capacity = %d, want %d", seed, current.Player.MaxEnergy, capacity)
+		}
+		energy := InitialEnergy
+		hasSword := false
+		routeZogs := 0
+		trip := append([]Point(nil), path...)
+		for index := len(path) - 2; index >= 0; index-- {
+			trip = append(trip, path[index])
+		}
+		trip = append(trip, maze.Start)
+		for step, point := range trip {
+			tile := maze.TileAt(point)
+			if tile == Sword {
+				hasSword = true
+			}
+			energy--
+			if tile == Monster {
+				routeZogs++
+				if !hasSword {
+					t.Fatalf("seed %d reaches a route Zog without a sword", seed)
+				}
+				energy -= 5
+				hasSword = false
+				maze.Tiles[point.Y][point.X] = Floor
+			}
+			if energy <= 0 {
+				t.Fatalf("seed %d ran out of energy at step %d/%d at (%d, %d), route length %d, capacity %d", seed, step+1, len(trip), point.X, point.Y, len(path), capacity)
+			}
+			if maze.TileAt(point) == Food {
+				energy += 50
+				if energy > capacity {
+					energy = capacity
+				}
+				maze.Tiles[point.Y][point.X] = Floor
+			}
+		}
+		if routeZogs != 2 {
+			t.Fatalf("seed %d has %d Zogs on the main route, want 2", seed, routeZogs)
+		}
 	}
 }
