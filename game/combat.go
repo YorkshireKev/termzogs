@@ -11,7 +11,7 @@ func (game *Game) resolveCombat(point Point) {
 		game.Maze.Tiles[point.Y][point.X] = Floor
 		game.ZogsSlain++
 		game.spendEnergy(5)
-		game.StatusMessage = "You slew the Zog, but your sword shattered!"
+		game.SetStatusMessage("You slew the Zog, but your sword shattered!")
 		return
 	}
 
@@ -22,9 +22,9 @@ func (game *Game) resolveCombat(point Point) {
 		game.Maze.Tiles[point.Y][point.X] = Floor
 		game.ZogsSlain++
 		game.spendEnergy(40)
-		game.StatusMessage = "Desperate fight! You defeated the Zog but lost 40 Energy!"
+		game.SetStatusMessage("Desperate fight! You defeated the Zog but lost 40 Energy!")
 		return
 	}
 	game.State = StateDefeat
-	game.StatusMessage = "The Zog overpowered you!"
+	game.SetStatusMessage("The Zog overpowered you!")
 }

@@ -34,11 +34,52 @@ func (current *Game) Start() {
 	current.Maze = GenerateMazeWithSeed(current.seed)
 	current.Player = Player{Position: current.Maze.Start, Energy: InitialEnergy, MaxEnergy: MaxEnergy}
 	current.State = StatePlaying
-	current.StatusMessage = ""
+	current.SetStatusMessage("")
 	current.ZogsSlain = 0
 	current.PendingSwap = false
 	current.GuidancePath = nil
 	current.GuidanceTicks = 0
+	current.ExpandedView = false
+}
+
+// SetStatusMessage displays a message until six successful movement steps pass.
+func (current *Game) SetStatusMessage(message string) {
+	current.StatusMessage = message
+	if message == "" {
+		current.StatusMessageSteps = 0
+		return
+	}
+	current.StatusMessageSteps = StatusMessageLifetime
+}
+
+func (current *Game) advanceStatusMessage() {
+	if current.StatusMessage == "" || current.StatusMessageSteps <= 0 {
+		return
+	}
+	current.StatusMessageSteps--
+	if current.StatusMessageSteps == 0 {
+		current.StatusMessage = ""
+	}
+}
+
+// ToggleMazeView opens the expanded view if the player can afford its credit cost.
+func (current *Game) ToggleMazeView() {
+	if current.State != StatePlaying {
+		return
+	}
+	if current.ExpandedView {
+		current.ExpandedView = false
+		current.SetStatusMessage("Returned to the local maze view.")
+		return
+	}
+	if current.Player.Energy <= MazeViewMinCredits {
+		current.SetStatusMessage("You don't have enough health credits to view the maze.")
+		return
+	}
+
+	current.Player.Energy -= MazeViewCost
+	current.ExpandedView = true
+	current.SetStatusMessage("Expanded maze view opened (-20 credits).")
 }
 
 // Restart begins a fresh run with a new maze seed.
@@ -67,6 +108,7 @@ func (current *Game) Move(dx, dy int) {
 
 	current.Player.Position = next
 	current.Player.Moves++
+	current.advanceStatusMessage()
 	current.advanceGuidance()
 	current.spendEnergy(1)
 	if current.State == StateDefeat {
@@ -77,7 +119,7 @@ func (current *Game) Move(dx, dy int) {
 	case Sword:
 		if current.Player.HasTreasure {
 			current.PendingSwap = true
-			current.StatusMessage = "Drop Treasure to pick up Sword? [Y/N]"
+			current.SetStatusMessage("Drop Treasure to pick up Sword? [Y/N]")
 		} else if !current.Player.HasSword {
 			current.Player.HasSword = true
 			current.Maze.Tiles[next.Y][next.X] = Floor
@@ -90,14 +132,14 @@ func (current *Game) Move(dx, dy int) {
 	case Food:
 		current.RestoreEnergy(50)
 		current.Maze.Tiles[next.Y][next.X] = Floor
-		current.StatusMessage = "You found food and restored energy."
+		current.SetStatusMessage("You found food and restored energy.")
 	case Monster:
 		current.resolveCombat(next)
 	}
 
 	if current.State == StatePlaying && current.Player.Position == current.Maze.Start && current.Player.HasTreasure {
 		current.State = StateVictory
-		current.StatusMessage = "You escaped with the treasure!"
+		current.SetStatusMessage("You escaped with the treasure!")
 	}
 }
 
@@ -119,13 +161,13 @@ func (current *Game) DropItem() {
 	case current.Player.HasSword:
 		current.Maze.Tiles[point.Y][point.X] = Sword
 		current.Player.HasSword = false
-		current.StatusMessage = "You dropped the sword."
+		current.SetStatusMessage("You dropped the sword.")
 	case current.Player.HasTreasure:
 		current.Maze.Tiles[point.Y][point.X] = Treasure
 		current.Player.HasTreasure = false
-		current.StatusMessage = "You dropped the treasure."
+		current.SetStatusMessage("You dropped the treasure.")
 	default:
-		current.StatusMessage = "You have nothing to drop."
+		current.SetStatusMessage("You have nothing to drop.")
 	}
 }
 
@@ -140,9 +182,9 @@ func (current *Game) AnswerSwordSwap(accept bool) {
 		current.Maze.Tiles[point.Y][point.X] = Treasure
 		current.Player.HasTreasure = false
 		current.Player.HasSword = true
-		current.StatusMessage = "You dropped the treasure and took the sword."
+		current.SetStatusMessage("You dropped the treasure and took the sword.")
 	} else {
-		current.StatusMessage = "You kept the treasure."
+		current.SetStatusMessage("You kept the treasure.")
 	}
 }
 
@@ -152,7 +194,7 @@ func (current *Game) Interact() {
 		return
 	}
 	if !current.adjacentToPrisoner() {
-		current.StatusMessage = "There is no prisoner nearby."
+		current.SetStatusMessage("There is no prisoner nearby.")
 		return
 	}
 	current.advanceGuidance()
@@ -167,12 +209,12 @@ func (current *Game) Interact() {
 	}
 	path, found := current.Maze.FindPath(current.Player.Position, destination)
 	if !found {
-		current.StatusMessage = "The prisoner cannot find a route."
+		current.SetStatusMessage("The prisoner cannot find a route.")
 		return
 	}
 	current.GuidancePath = path
 	current.GuidanceTicks = 15
-	current.StatusMessage = "The prisoner shows you the way."
+	current.SetStatusMessage("The prisoner shows you the way.")
 }
 
 // adjacentToPrisoner reports whether a prisoner is in a cardinally adjacent cell.

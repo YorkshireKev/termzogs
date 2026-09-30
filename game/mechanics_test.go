@@ -132,6 +132,76 @@ func TestDropItemLeavesItOnCurrentCell(t *testing.T) {
 	}
 }
 
+func TestExpandedMazeViewCostsCreditsAndEnforcesMinimum(t *testing.T) {
+	current := NewGameWithSeed(19)
+	current.ToggleMazeView()
+	if !current.ExpandedView || current.Player.Energy != InitialEnergy-MazeViewCost {
+		t.Fatalf("view=%t energy=%d, want expanded view and %d energy", current.ExpandedView, current.Player.Energy, InitialEnergy-MazeViewCost)
+	}
+	current.ToggleMazeView()
+	if current.ExpandedView || current.Player.Energy != InitialEnergy-MazeViewCost {
+		t.Fatal("closing expanded view should not charge credits")
+	}
+
+	current.Player.Energy = MazeViewMinCredits
+	current.ToggleMazeView()
+	if current.ExpandedView || current.Player.Energy != MazeViewMinCredits {
+		t.Fatal("insufficient credits opened the view or reduced energy")
+	}
+	if current.StatusMessage != "You don't have enough health credits to view the maze." {
+		t.Fatalf("insufficient-credit message = %q", current.StatusMessage)
+	}
+}
+
+func TestExpandedMazeViewAllowsCreditsAboveMinimum(t *testing.T) {
+	current := NewGameWithSeed(20)
+	current.Player.Energy = MazeViewMinCredits + 1
+	current.ToggleMazeView()
+	if !current.ExpandedView || current.Player.Energy != MazeViewMinCredits+1-MazeViewCost {
+		t.Fatalf("view=%t energy=%d, expected expanded view with %d credits", current.ExpandedView, current.Player.Energy, MazeViewMinCredits+1-MazeViewCost)
+	}
+}
+
+func TestStatusMessageExpiresAfterSixSuccessfulMoves(t *testing.T) {
+	current := NewGameWithSeed(23)
+	for x := 2; x <= 7; x++ {
+		current.Maze.Tiles[1][x] = Floor
+	}
+	current.SetStatusMessage("Temporary message")
+	for step := 0; step < StatusMessageLifetime-1; step++ {
+		current.Move(1, 0)
+		if current.StatusMessage == "" {
+			t.Fatalf("message disappeared after %d moves", step+1)
+		}
+	}
+	current.Move(1, 0)
+	if current.StatusMessage != "" {
+		t.Fatalf("message remained after %d moves: %q", StatusMessageLifetime, current.StatusMessage)
+	}
+}
+
+func TestNewStatusMessageResetsSixMoveLifetime(t *testing.T) {
+	current := NewGameWithSeed(24)
+	for x := 2; x <= 9; x++ {
+		current.Maze.Tiles[1][x] = Floor
+	}
+	current.SetStatusMessage("First message")
+	for step := 0; step < 3; step++ {
+		current.Move(1, 0)
+	}
+	current.SetStatusMessage("Replacement message")
+	for step := 0; step < StatusMessageLifetime-1; step++ {
+		current.Move(1, 0)
+		if current.StatusMessage == "" {
+			t.Fatalf("replacement message disappeared after %d moves", step+1)
+		}
+	}
+	current.Move(1, 0)
+	if current.StatusMessage != "" {
+		t.Fatalf("replacement message remained after six moves: %q", current.StatusMessage)
+	}
+}
+
 func TestCarriedSwordDoesNotConsumeAnotherSword(t *testing.T) {
 	current := NewGameWithSeed(18)
 	current.Player.HasSword = true

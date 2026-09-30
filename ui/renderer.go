@@ -9,7 +9,12 @@ import (
 )
 
 // ViewportSize is the width and height of the local gameplay view.
-const ViewportSize = 15
+const ViewportSize = 10
+
+const (
+	ExpandedViewportWidth  = 70
+	ExpandedViewportHeight = 20
+)
 
 // Renderer draws game state onto a tcell screen.
 type Renderer struct{}
@@ -26,10 +31,14 @@ func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 	}
 
 	viewWidth := ViewportSize
+	viewHeight := ViewportSize
+	if current.ExpandedView {
+		viewWidth = ExpandedViewportWidth
+		viewHeight = ExpandedViewportHeight
+	}
 	if viewWidth > screenWidth {
 		viewWidth = screenWidth
 	}
-	viewHeight := ViewportSize
 	if viewHeight > screenHeight {
 		viewHeight = screenHeight
 	}

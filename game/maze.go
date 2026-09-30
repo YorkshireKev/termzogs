@@ -10,7 +10,7 @@ import (
 const (
 	// MazeWidth and MazeHeight define the fixed maze dimensions.
 	MazeWidth  = 62
-	MazeHeight = 62
+	MazeHeight = 42
 )
 
 // Point identifies a cell in the maze.

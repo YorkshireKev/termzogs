@@ -75,6 +75,13 @@ func run() error {
 
 // handleKey maps quit and movement keys to game actions.
 func handleKey(current *game.Game, event *tcell.EventKey) bool {
+	if current.ExpandedView {
+		current.ExpandedView = false
+		current.SetStatusMessage("")
+		if event.Rune() == 'v' || event.Rune() == 'V' {
+			return false
+		}
+	}
 	if event.Key() == tcell.KeyCtrlC || event.Key() == tcell.KeyEscape || event.Rune() == 'q' || event.Rune() == 'Q' {
 		return true
 	}
@@ -101,6 +108,9 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 	}
 
 	switch event.Rune() {
+	case 'v', 'V':
+		current.ToggleMazeView()
+		return false
 	case 'D':
 		current.DropItem()
 		return false

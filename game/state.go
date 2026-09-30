@@ -5,8 +5,12 @@ import "math/rand"
 
 const (
 	// InitialEnergy and MaxEnergy define the starting and capacity values.
-	InitialEnergy = 200
-	MaxEnergy     = 300
+	InitialEnergy         = 200
+	MaxEnergy             = 300
+	StatusMessageLifetime = 6
+
+	MazeViewMinCredits = 30
+	MazeViewCost       = 20
 )
 
 // GameState identifies the current screen and whether play can continue.
@@ -32,14 +36,16 @@ type Player struct {
 
 // Game combines maze data with player, combat, and guidance state.
 type Game struct {
-	Maze          *Maze
-	Player        Player
-	State         GameState
-	StatusMessage string
-	ZogsSlain     int
-	PendingSwap   bool
-	GuidancePath  []Point
-	GuidanceTicks int
-	rng           *rand.Rand
-	seed          int64
+	Maze               *Maze
+	Player             Player
+	State              GameState
+	StatusMessage      string
+	StatusMessageSteps int
+	ZogsSlain          int
+	PendingSwap        bool
+	GuidancePath       []Point
+	GuidanceTicks      int
+	ExpandedView       bool
+	rng                *rand.Rand
+	seed               int64
 }
