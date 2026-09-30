@@ -99,9 +99,15 @@ func drawLocalViewport(screen tcell.Screen, current *game.Game) {
 		for x := 0; x < viewWidth; x++ {
 			world := game.Point{X: worldLeft + x, Y: worldTop + y}
 			character, style := displayAt(current, world, guidance)
-			for blockY := 0; blockY < ViewportCellHeight; blockY++ {
+			pattern := localCellPattern(character)
+			for blockY, row := range pattern {
+				characters := []rune(row)
 				for blockX := 0; blockX < ViewportCellWidth; blockX++ {
-					screen.SetContent(viewLeft+x*ViewportCellWidth+blockX, viewTop+y*ViewportCellHeight+blockY, character, nil, style)
+					patternCharacter := ' '
+					if blockX < len(characters) {
+						patternCharacter = characters[blockX]
+					}
+					screen.SetContent(viewLeft+x*ViewportCellWidth+blockX, viewTop+y*ViewportCellHeight+blockY, patternCharacter, nil, style)
 				}
 			}
 		}

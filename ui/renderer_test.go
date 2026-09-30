@@ -8,6 +8,59 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+func TestLocalCellPatternsMatchViewportCellSize(t *testing.T) {
+	for character, pattern := range localCellPatterns {
+		for rowIndex, row := range pattern {
+			if width := len([]rune(row)); width != ViewportCellWidth {
+				t.Errorf("pattern %q row %d has width %d, want %d", character, rowIndex, width, ViewportCellWidth)
+			}
+		}
+	}
+}
+
+func TestDrawUsesCustomPatternInLocalView(t *testing.T) {
+	originalPattern := localCellPatterns['M']
+	localCellPatterns['M'] = cellPattern{"ABCDEF", "GHIJKL", "MNOPQR"}
+	defer func() {
+		localCellPatterns['M'] = originalPattern
+	}()
+
+	screen := tcell.NewSimulationScreen("")
+	if err := screen.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer screen.Fini()
+
+	current := &game.Game{
+		Maze: &game.Maze{},
+		Player: game.Player{
+			Position:  game.Point{X: 10, Y: 10},
+			MaxEnergy: game.MaxEnergy,
+			Energy:    game.InitialEnergy,
+		},
+		State: game.StatePlaying,
+	}
+	monster := game.Point{X: 11, Y: 10}
+	current.Maze.Tiles[monster.Y][monster.X] = game.Monster
+
+	Renderer{}.Draw(screen, current)
+	screen.Show()
+	cells, width, height := screen.GetContents()
+	viewLeft := (width - ViewportWidth*ViewportCellWidth) / 2
+	viewTop := (height - 2 - ViewportHeight*ViewportCellHeight) / 2
+	worldLeft := current.Player.Position.X - ViewportWidth/2
+	worldTop := current.Player.Position.Y - ViewportHeight/2
+	cellLeft := viewLeft + (monster.X-worldLeft)*ViewportCellWidth
+	cellTop := viewTop + (monster.Y-worldTop)*ViewportCellHeight
+	for row, expected := range localCellPatterns['M'] {
+		for column, want := range []rune(expected) {
+			if got := cells[(cellTop+row)*width+cellLeft+column].Runes[0]; got != want {
+				t.Errorf("rendered pattern at (%d, %d) = %q, want %q", column, row, got, want)
+			}
+		}
+	}
+}
+
 func TestDrawRendersGuidanceArrowsAlongPathTurns(t *testing.T) {
 	screen := tcell.NewSimulationScreen("")
 	if err := screen.Init(); err != nil {
