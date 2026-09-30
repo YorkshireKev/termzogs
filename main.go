@@ -33,7 +33,7 @@ func run() error {
 	defer screen.Fini()
 
 	screen.SetTitle("TermZogs")
-	current := game.NewGame()
+	current := game.NewTitleGame()
 	renderer := ui.Renderer{}
 	stopEvents := make(chan struct{})
 	defer close(stopEvents)
@@ -78,6 +78,36 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 	if event.Key() == tcell.KeyCtrlC || event.Key() == tcell.KeyEscape || event.Rune() == 'q' || event.Rune() == 'Q' {
 		return true
 	}
+	if current.State == game.StateTitle {
+		if event.Key() == tcell.KeyRune && event.Rune() == ' ' {
+			current.Start()
+		}
+		return false
+	}
+	if current.State == game.StateDefeat || current.State == game.StateVictory {
+		if event.Rune() == 'r' || event.Rune() == 'R' {
+			current.Restart()
+		}
+		return false
+	}
+	if current.PendingSwap {
+		switch event.Rune() {
+		case 'y', 'Y':
+			current.AnswerSwordSwap(true)
+		case 'n', 'N':
+			current.AnswerSwordSwap(false)
+		}
+		return false
+	}
+
+	switch event.Rune() {
+	case 'e', 'E':
+		current.Interact()
+		return false
+	case 'D':
+		current.DropItem()
+		return false
+	}
 
 	dx, dy := 0, 0
 	switch event.Key() {
@@ -97,7 +127,7 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 			dy = 1
 		case 'a', 'A':
 			dx = -1
-		case 'd', 'D':
+		case 'd':
 			dx = 1
 		}
 	}

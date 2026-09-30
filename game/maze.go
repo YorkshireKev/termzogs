@@ -30,6 +30,7 @@ const (
 	Prisoner
 	Monster
 	Treasure
+	Food
 )
 
 // Maze stores the cell grid and the starting and treasure locations.
@@ -49,10 +50,6 @@ func GenerateMazeWithSeed(seed int64) *Maze {
 	maze := &Maze{Start: Point{X: 1, Y: 1}}
 	rng := rand.New(rand.NewSource(seed))
 
-	type cell struct {
-		point   Point
-		visited bool
-	}
 	visited := [MazeHeight][MazeWidth]bool{}
 	stack := []Point{maze.Start}
 	visited[maze.Start.Y][maze.Start.X] = true
@@ -99,8 +96,40 @@ func GenerateMazeWithSeed(seed int64) *Maze {
 	place(Sword, 12)
 	place(Prisoner, 5)
 	place(Monster, 18)
+	placeFood(rng, maze)
 
 	return maze
+}
+
+// placeFood scatters food across available maze dead ends.
+func placeFood(rng *rand.Rand, maze *Maze) {
+	deadEnds := make([]Point, 0)
+	for y := 1; y < MazeHeight-1; y++ {
+		for x := 1; x < MazeWidth-1; x++ {
+			point := Point{X: x, Y: y}
+			if maze.Tiles[y][x] != Floor || point == maze.Start {
+				continue
+			}
+			openNeighbors := 0
+			for _, direction := range [...]Point{{X: 0, Y: -1}, {X: 1, Y: 0}, {X: 0, Y: 1}, {X: -1, Y: 0}} {
+				if maze.TileAt(Point{X: x + direction.X, Y: y + direction.Y}) != Wall {
+					openNeighbors++
+				}
+			}
+			if openNeighbors == 1 {
+				deadEnds = append(deadEnds, point)
+			}
+		}
+	}
+
+	count := 8 + rng.Intn(5)
+	if count > len(deadEnds) {
+		count = len(deadEnds)
+	}
+	for _, index := range rng.Perm(len(deadEnds))[:count] {
+		point := deadEnds[index]
+		maze.Tiles[point.Y][point.X] = Food
+	}
 }
 
 // TileAt returns the cell contents, treating out-of-bounds coordinates as walls.

@@ -3,8 +3,6 @@ package ui
 // This file draws the player-centered maze viewport and status line.
 
 import (
-	"fmt"
-
 	"termzogs/game"
 
 	"github.com/gdamore/tcell/v2"
@@ -23,6 +21,9 @@ func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 	if screenWidth <= 0 || screenHeight <= 0 {
 		return
 	}
+	if DrawOverlay(screen, current) {
+		return
+	}
 
 	viewWidth := ViewportSize
 	if viewWidth > screenWidth {
@@ -36,12 +37,37 @@ func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 	viewTop := (screenHeight - viewHeight) / 2
 	worldLeft := current.Player.Position.X - viewWidth/2
 	worldTop := current.Player.Position.Y - viewHeight/2
+	guidance := make(map[game.Point]rune)
+	if current.GuidanceTicks > 0 {
+		for index, point := range current.GuidancePath {
+			if index >= 10 {
+				break
+			}
+			from := point
+			to := point
+			if index == 0 {
+				from = current.Player.Position
+			} else {
+				from = current.GuidancePath[index-1]
+			}
+			if index+1 < len(current.GuidancePath) {
+				to = current.GuidancePath[index+1]
+			} else {
+				to = point
+			}
+			guidance[point] = directionArrow(from, to)
+		}
+	}
 
 	for y := 0; y < viewHeight; y++ {
 		for x := 0; x < viewWidth; x++ {
 			world := game.Point{X: worldLeft + x, Y: worldTop + y}
 			tile := current.Maze.TileAt(world)
 			character, style := tileAppearance(tile)
+			if arrow, ok := guidance[world]; ok {
+				character = arrow
+				style = tcell.StyleDefault.Foreground(tcell.ColorAqua).Bold(true)
+			}
 			if world == current.Player.Position {
 				character = '@'
 				style = tcell.StyleDefault.Foreground(tcell.ColorYellow).Bold(true)
@@ -50,10 +76,7 @@ func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 		}
 	}
 
-	if screenHeight > viewTop+viewHeight {
-		status := fmt.Sprintf("Moves: %d  Sword: %t  Treasure: %t  (Q to quit)", current.Player.Moves, current.Player.HasSword, current.Player.HasTreasure)
-		drawText(screen, (screenWidth-len(status))/2, viewTop+viewHeight, screenWidth, status, tcell.StyleDefault.Foreground(tcell.ColorWhite))
-	}
+	DrawHUD(screen, current)
 }
 
 // tileAppearance maps a maze tile to its display character and style.
@@ -69,13 +92,33 @@ func tileAppearance(tile game.Tile) (rune, tcell.Style) {
 		return 'M', tcell.StyleDefault.Foreground(tcell.ColorRed).Bold(true)
 	case game.Treasure:
 		return '$', tcell.StyleDefault.Foreground(tcell.ColorYellow).Bold(true)
+	case game.Food:
+		return '%', tcell.StyleDefault.Foreground(tcell.ColorGreen).Bold(true)
 	default:
 		return '█', tcell.StyleDefault.Foreground(tcell.ColorGray)
 	}
 }
 
+// directionArrow points from one adjacent path cell toward the next.
+func directionArrow(from, to game.Point) rune {
+	switch {
+	case to.X > from.X:
+		return '→'
+	case to.X < from.X:
+		return '←'
+	case to.Y > from.Y:
+		return '↓'
+	default:
+		return '↑'
+	}
+}
+
 // drawText writes a clipped line of text starting at the given screen position.
 func drawText(screen tcell.Screen, x, y, screenWidth int, text string, style tcell.Style) {
+	_, screenHeight := screen.Size()
+	if y < 0 || y >= screenHeight {
+		return
+	}
 	for _, character := range text {
 		if x >= screenWidth {
 			return
