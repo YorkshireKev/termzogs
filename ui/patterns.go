@@ -50,9 +50,9 @@ var localCellPatterns = map[rune]cellPattern{
 	},
 	// Player
 	'@': {
-		"@@@@@@",
-		"@@@@@@",
-		"@@@@@@",
+		"  O   ",
+		" /|\\  ",
+		" / \\  ",
 	},
 	// Guidance arrow pointing right
 	'→': {
