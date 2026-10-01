@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -94,6 +95,88 @@ func TestDefeatHeadlineNamesZogCause(t *testing.T) {
 	}
 	if got := defeatHeadline(game.DefeatCauseEnergy); got != "GAME OVER - YOU PERISHED IN THE MAZE" {
 		t.Errorf("energy defeat headline = %q", got)
+	}
+}
+
+func TestTermzogsTitleArtUsesSixColumnLetterGlyphs(t *testing.T) {
+	lines := termzogsTitleArt()
+	if len(lines) != titleGlyphHeight {
+		t.Fatalf("title art has %d rows, want %d", len(lines), titleGlyphHeight)
+	}
+	for rowIndex, line := range lines {
+		if width := len([]rune(line)); width != titleArtWidth {
+			t.Errorf("title art row %d has width %d, want %d", rowIndex, width, titleArtWidth)
+		}
+	}
+	for letter, glyph := range titleGlyphs {
+		for rowIndex, line := range glyph {
+			if width := len([]rune(line)); width != titleGlyphWidth {
+				t.Errorf("glyph %q row %d has width %d, want %d", letter, rowIndex, width, titleGlyphWidth)
+			}
+			for _, character := range line {
+				if character != letter && character != ' ' {
+					t.Errorf("glyph %q contains unexpected character %q", letter, character)
+				}
+			}
+		}
+	}
+}
+
+func TestInstructionsPageIncludesControlsAndAttribution(t *testing.T) {
+	lines := instructionsPageLines()
+	page := strings.Join(lines, "\n")
+	for _, expected := range []string{
+		"ARROWS / WASD",
+		"SHIFT-D",
+		"V/M Expanded map",
+		"Y/N",
+		"Mazogs by Don Priestley",
+		"Press I or ESC to return to title",
+	} {
+		if !strings.Contains(page, expected) {
+			t.Errorf("instructions page is missing %q", expected)
+		}
+	}
+	for row, line := range lines {
+		if width := len([]rune(line)); width > 80 {
+			t.Errorf("instructions row %d is %d columns wide, exceeds 80", row, width)
+		}
+	}
+}
+
+func TestTitleLogoIsRedAndSupportingTextIsWhite(t *testing.T) {
+	screen := tcell.NewSimulationScreen("")
+	if err := screen.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer screen.Fini()
+
+	Renderer{}.Draw(screen, &game.Game{State: game.StateTitle})
+	screen.Show()
+	cells, width, height := screen.GetContents()
+	titleLines := append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
+	startY := height/2 - len(titleLines)/2
+	logoX := (width - titleArtWidth) / 2
+	logoCell := cells[(startY-1)*width+logoX]
+	logoForeground, _, _ := logoCell.Style.Decompose()
+	if len(logoCell.Runes) == 0 || logoCell.Runes[0] != 'T' || logoForeground != tcell.ColorRed {
+		t.Errorf("title logo cell = %q with foreground %v, want red T", logoCell.Runes, logoForeground)
+	}
+
+	copyright := titleLines[titleGlyphHeight]
+	copyrightX := (width - len([]rune(copyright))) / 2
+	copyrightCell := cells[(startY+titleGlyphHeight-1)*width+copyrightX]
+	copyrightForeground, _, _ := copyrightCell.Style.Decompose()
+	if len(copyrightCell.Runes) == 0 || copyrightCell.Runes[0] != '©' || copyrightForeground != tcell.ColorBlue {
+		t.Errorf("copyright cell = %q with foreground %v, want blue ©", copyrightCell.Runes, copyrightForeground)
+	}
+
+	subtitleY := startY + titleGlyphHeight + 2
+	subtitleX := (width - len(titleLines[titleGlyphHeight+2])) / 2
+	subtitleCell := cells[subtitleY*width+subtitleX]
+	subtitleForeground, _, _ := subtitleCell.Style.Decompose()
+	if len(subtitleCell.Runes) == 0 || subtitleCell.Runes[0] != 'F' || subtitleForeground != tcell.ColorWhite {
+		t.Errorf("subtitle cell = %q with foreground %v, want white F", subtitleCell.Runes, subtitleForeground)
 	}
 }
 

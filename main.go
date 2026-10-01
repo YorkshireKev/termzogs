@@ -76,6 +76,10 @@ func run() error {
 
 // handleKey maps quit and movement keys to game actions.
 func handleKey(current *game.Game, event *tcell.EventKey) bool {
+	if current.State == game.StateInstructions {
+		current.State = game.StateTitle
+		return false
+	}
 	if current.ExpandedView {
 		current.ExpandedView = false
 		current.SetStatusMessage("")
@@ -83,15 +87,20 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 			return false
 		}
 	}
-	if event.Key() == tcell.KeyCtrlC || event.Key() == tcell.KeyEscape || event.Rune() == 'q' || event.Rune() == 'Q' {
+	if event.Key() == tcell.KeyCtrlC || event.Rune() == 'q' || event.Rune() == 'Q' || (event.Key() == tcell.KeyEscape && current.State != game.StateInstructions) {
 		return true
 	}
 	if current.CombatInProgress() {
 		return false
 	}
 	if current.State == game.StateTitle {
-		if event.Key() == tcell.KeyRune && event.Rune() == ' ' {
-			current.Start()
+		if event.Key() == tcell.KeyRune {
+			switch event.Rune() {
+			case ' ':
+				current.Start()
+			case 'i', 'I':
+				current.State = game.StateInstructions
+			}
 		}
 		return false
 	}

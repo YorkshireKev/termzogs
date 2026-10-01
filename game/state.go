@@ -26,6 +26,7 @@ const (
 	StatePlaying
 	StateVictory
 	StateDefeat
+	StateInstructions
 )
 
 type DefeatCause uint8

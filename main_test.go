@@ -40,6 +40,30 @@ func TestMapKeysOpenAndCloseExpandedView(t *testing.T) {
 	}
 }
 
+func TestTitleInstructionsOpenAndAnyKeyReturns(t *testing.T) {
+	for _, key := range []rune{'i', 'I'} {
+		current := game.NewTitleGame()
+		handleKey(current, tcell.NewEventKey(tcell.KeyRune, key, 0))
+		if current.State != game.StateInstructions {
+			t.Fatalf("key %q set state to %v, want instructions", key, current.State)
+		}
+
+		for _, event := range []*tcell.EventKey{
+			tcell.NewEventKey(tcell.KeyRune, 'q', 0),
+			tcell.NewEventKey(tcell.KeyEscape, 0, 0),
+			tcell.NewEventKey(tcell.KeyRune, ' ', 0),
+		} {
+			if quit := handleKey(current, event); quit {
+				t.Fatalf("key %v quit instead of returning to title", event)
+			}
+			if current.State != game.StateTitle {
+				t.Fatalf("key %v set state to %v, want title", event, current.State)
+			}
+			current.State = game.StateInstructions
+		}
+	}
+}
+
 func TestCombatBlocksGameplayInputButAllowsQuit(t *testing.T) {
 	current := game.NewGameWithSeed(26)
 	current.Maze.Tiles[1][2] = game.Monster

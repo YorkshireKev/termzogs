@@ -4,6 +4,7 @@ package ui
 
 import (
 	"fmt"
+	"unicode/utf8"
 
 	"termzogs/game"
 
@@ -22,7 +23,9 @@ func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
 	style := blackBackgroundStyle().Foreground(tcell.ColorWhite).Bold(true)
 	switch current.State {
 	case game.StateTitle:
-		lines = []string{"TERMZOGS", "", "Find the treasure and return to the entrance.", "", "Press SPACE to begin  |  Q to quit"}
+		lines = append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
+	case game.StateInstructions:
+		lines = instructionsPageLines()
 	case game.StateVictory:
 		style = blackBackgroundStyle().Foreground(tcell.ColorGreen).Bold(true)
 		lines = []string{
@@ -57,9 +60,72 @@ func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
 		return false
 	}
 	for index, line := range lines {
-		drawCentered(screen, width, height/2-len(lines)/2+index, line, style)
+		lineStyle := style
+		y := height/2 - len(lines)/2 + index
+		if current.State == game.StateTitle && index < titleGlyphHeight {
+			lineStyle = blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
+		} else if current.State == game.StateTitle && index == titleGlyphHeight {
+			lineStyle = blackBackgroundStyle().Foreground(tcell.ColorBlue).Bold(true)
+		}
+		if current.State == game.StateTitle && index <= titleGlyphHeight {
+			y--
+		}
+		drawCentered(screen, width, y, line, lineStyle)
 	}
 	return true
+}
+
+const (
+	titleGlyphWidth  = 6
+	titleGlyphHeight = 5
+	titleWord        = "TERMZOGS"
+	titleArtWidth    = len(titleWord)*titleGlyphWidth + len(titleWord) - 1
+)
+
+var titleGlyphs = map[rune][titleGlyphHeight]string{
+	'T': {"TTTTTT", "  TT  ", "  TT  ", "  TT  ", "  TT  "},
+	'E': {"EEEEEE", "EE    ", "EEEEE ", "EE    ", "EEEEEE"},
+	'R': {"RRRRR ", "RR  RR", "RRRRR ", "RR RR ", "RR  RR"},
+	'M': {"MM  MM", "MMMMMM", "MM  MM", "MM  MM", "MM  MM"},
+	'Z': {"ZZZZZZ", "   ZZ ", "  ZZ  ", " ZZ   ", "ZZZZZZ"},
+	'O': {" OOOO ", "OO  OO", "OO  OO", "OO  OO", " OOOO "},
+	'G': {" GGGG ", "GG    ", "GG GGG", "GG  GG", " GGGG "},
+	'S': {" SSSS ", "SS    ", " SSSS ", "    SS", "SSSSS "},
+}
+
+func termzogsTitleArt() []string {
+	lines := make([]string, titleGlyphHeight)
+	for _, letter := range titleWord {
+		for row, glyph := range titleGlyphs[letter] {
+			if lines[row] != "" {
+				lines[row] += " "
+			}
+			lines[row] += glyph
+		}
+	}
+	return lines
+}
+
+func instructionsPageLines() []string {
+	return []string{
+		"HOW TO PLAY TERMZOGS",
+		"",
+		"Find the treasure near the maze center and return to the entrance.",
+		"Each move costs 1 energy. Food restores 50 energy.",
+		"Armed: defeat Zogs with a sword; it breaks and combat costs 5 more.",
+		"Unarmed fights are 50/50: victory costs 40 energy; defeat ends the run.",
+		"You can carry a sword or treasure, but not both.",
+		"Face a prisoner in a wall niche to ask for directions (cost: 15 energy).",
+		"Guidance points to treasure, or to the entrance while carrying it.",
+		"",
+		"ARROWS / WASD Move     V/M Expanded map",
+		"SHIFT-D Drop item     Y/N Answer sword-swap prompt",
+		"",
+		"Termzogs is heavily inspired by the superb Sinclair ZX81 game",
+		"Mazogs by Don Priestley.",
+		"",
+		"Press any key to return to title",
+	}
 }
 
 func defeatHeadline(cause game.DefeatCause) string {
@@ -71,5 +137,5 @@ func defeatHeadline(cause game.DefeatCause) string {
 
 // drawCentered places a clipped text line at the horizontal screen midpoint.
 func drawCentered(screen tcell.Screen, width, y int, text string, style tcell.Style) {
-	drawText(screen, (width-len(text))/2, y, width, text, style)
+	drawText(screen, (width-utf8.RuneCountInString(text))/2, y, width, text, style)
 }
