@@ -17,7 +17,7 @@ func DrawHUD(screen tcell.Screen, current *game.Game) {
 		return
 	}
 	if height > 1 && current.StatusMessage != "" {
-		drawText(screen, 0, height-2, width, current.StatusMessage, tcell.StyleDefault.Foreground(tcell.ColorWhite))
+		drawText(screen, 0, height-2, width, current.StatusMessage, blackBackgroundStyle().Foreground(tcell.ColorWhite))
 	}
 	if current.State != game.StatePlaying {
 		return
@@ -39,7 +39,7 @@ func DrawHUD(screen tcell.Screen, current *game.Game) {
 		holding = "TREASURE"
 	}
 	status := fmt.Sprintf("Energy: %s %d/%d | Holding: %s | Treasure: %s | Steps: %d", bar, current.Player.Energy, capacity, holding, yesNo(current.Player.HasTreasure), current.Player.Moves)
-	drawText(screen, 0, height-1, width, status, tcell.StyleDefault.Foreground(tcell.ColorWhite))
+	drawText(screen, 0, height-1, width, status, blackBackgroundStyle().Foreground(tcell.ColorWhite))
 }
 
 // yesNo formats a boolean as the HUD's inventory indicator.

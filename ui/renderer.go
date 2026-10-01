@@ -23,6 +23,7 @@ type Renderer struct{}
 // Draw paints the local viewport and player status.
 func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 	screenWidth, screenHeight := screen.Size()
+	screen.SetStyle(blackBackgroundStyle())
 	screen.Clear()
 	if screenWidth <= 0 || screenHeight <= 0 {
 		return
@@ -140,11 +141,11 @@ func displayAt(current *game.Game, world game.Point, guidance map[game.Point]run
 	character, style := tileAppearance(current.Maze.TileAt(world))
 	if arrow, ok := guidance[world]; ok {
 		character = arrow
-		style = tcell.StyleDefault.Foreground(tcell.ColorAqua).Bold(true)
+		style = blackBackgroundStyle().Foreground(tcell.ColorAqua).Bold(true)
 	}
 	if world == current.Player.Position {
 		character = '@'
-		style = tcell.StyleDefault.Foreground(tcell.ColorYellow).Bold(true)
+		style = blackBackgroundStyle().Foreground(tcell.ColorYellow).Bold(true)
 	}
 	return character, style
 }
@@ -153,20 +154,24 @@ func displayAt(current *game.Game, world game.Point, guidance map[game.Point]run
 func tileAppearance(tile game.Tile) (rune, tcell.Style) {
 	switch tile {
 	case game.Floor:
-		return ' ', tcell.StyleDefault.Foreground(tcell.ColorBlack)
+		return ' ', blackBackgroundStyle().Foreground(tcell.ColorBlack)
 	case game.Sword:
-		return '/', tcell.StyleDefault.Foreground(tcell.ColorAqua)
+		return '/', blackBackgroundStyle().Foreground(tcell.ColorAqua)
 	case game.Prisoner:
-		return 'P', tcell.StyleDefault.Foreground(tcell.ColorGreen)
+		return 'P', blackBackgroundStyle().Foreground(tcell.ColorGreen)
 	case game.Monster:
-		return 'M', tcell.StyleDefault.Foreground(tcell.ColorRed).Bold(true)
+		return 'M', blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
 	case game.Treasure:
-		return '$', tcell.StyleDefault.Foreground(tcell.ColorYellow).Bold(true)
+		return '$', blackBackgroundStyle().Foreground(tcell.ColorYellow).Bold(true)
 	case game.Food:
-		return '%', tcell.StyleDefault.Foreground(tcell.ColorGreen).Bold(true)
+		return '%', blackBackgroundStyle().Foreground(tcell.ColorGreen).Bold(true)
 	default:
-		return '█', tcell.StyleDefault.Foreground(tcell.ColorGray)
+		return '█', blackBackgroundStyle().Foreground(tcell.ColorGray)
 	}
+}
+
+func blackBackgroundStyle() tcell.Style {
+	return tcell.StyleDefault.Background(tcell.ColorBlack)
 }
 
 // directionArrow points from one adjacent path cell toward the next.

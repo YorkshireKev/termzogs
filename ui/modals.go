@@ -19,12 +19,12 @@ func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
 	}
 
 	var lines []string
-	style := tcell.StyleDefault.Foreground(tcell.ColorWhite).Bold(true)
+	style := blackBackgroundStyle().Foreground(tcell.ColorWhite).Bold(true)
 	switch current.State {
 	case game.StateTitle:
 		lines = []string{"TERMZOGS", "", "Find the treasure and return to the entrance.", "", "Press SPACE to begin  |  Q to quit"}
 	case game.StateVictory:
-		style = tcell.StyleDefault.Foreground(tcell.ColorGreen).Bold(true)
+		style = blackBackgroundStyle().Foreground(tcell.ColorGreen).Bold(true)
 		lines = []string{
 			"VICTORY! YOU ESCAPED WITH THE TREASURE!",
 			fmt.Sprintf("Steps Taken: %d", current.Player.Moves),
@@ -33,7 +33,7 @@ func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
 			"Press R to play again  |  Q to quit",
 		}
 	case game.StateDefeat:
-		style = tcell.StyleDefault.Foreground(tcell.ColorRed).Bold(true)
+		style = blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
 		lines = []string{
 			"GAME OVER - YOU PERISHED IN THE MAZE",
 			fmt.Sprintf("Steps Taken: %d  |  Zogs Slain: %d", current.Player.Moves, current.ZogsSlain),
@@ -43,7 +43,7 @@ func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
 		if !current.PendingSwap {
 			return false
 		}
-		style = tcell.StyleDefault.Foreground(tcell.ColorYellow).Bold(true)
+		style = blackBackgroundStyle().Foreground(tcell.ColorYellow).Bold(true)
 		lines = []string{"Drop Treasure to pick up Sword?", "Y: drop treasure and take sword  |  N: keep treasure"}
 	default:
 		return false

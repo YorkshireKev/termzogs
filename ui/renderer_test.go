@@ -18,6 +18,25 @@ func TestLocalCellPatternsMatchViewportCellSize(t *testing.T) {
 	}
 }
 
+func TestDrawAlwaysUsesBlackBackground(t *testing.T) {
+	screen := tcell.NewSimulationScreen("")
+	if err := screen.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer screen.Fini()
+
+	current := &game.Game{State: game.StateTitle}
+	Renderer{}.Draw(screen, current)
+	screen.Show()
+	cells, _, _ := screen.GetContents()
+	for index, cell := range cells {
+		_, background, _ := cell.Style.Decompose()
+		if background != tcell.ColorBlack {
+			t.Errorf("cell %d background = %v, want black", index, background)
+		}
+	}
+}
+
 func TestDrawUsesCustomPatternInLocalView(t *testing.T) {
 	originalPattern := localCellPatterns['M']
 	localCellPatterns['M'] = cellPattern{"ABCDEF", "GHIJKL", "MNOPQR"}
