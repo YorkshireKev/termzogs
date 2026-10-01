@@ -25,9 +25,9 @@ var localCellPatterns = map[rune][]cellPattern{
 	// Prisoner
 	'P': {
 		{
-			"PPPPPP",
-			"PPPPPP",
-			"PPPPPP",
+			"| O | ",
+			"|/|\\| ",
+			"|/ \\| ",
 		},
 	},
 	// Zog frames alternate its feet.
