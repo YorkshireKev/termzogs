@@ -97,13 +97,13 @@ func drawLocalViewport(screen tcell.Screen, current *game.Game) {
 	worldLeft := current.Player.Position.X - viewWidth/2
 	worldTop := current.Player.Position.Y - viewHeight/2
 	guidance := guidanceFor(current)
-	monsterFrame := monsterAnimationFrame(time.Now())
+	timedFrame := timedAnimationFrame(time.Now())
 
 	for y := 0; y < viewHeight; y++ {
 		for x := 0; x < viewWidth; x++ {
 			world := game.Point{X: worldLeft + x, Y: worldTop + y}
 			character, style := displayAt(current, world, guidance)
-			frame := monsterFrame
+			frame := timedFrame
 			if world == current.Player.Position {
 				character = playerSpriteForFacing(current.Player.Facing)
 				frame = current.Player.Moves
@@ -134,8 +134,8 @@ func playerSpriteForFacing(facing game.Point) rune {
 	}
 }
 
-func monsterAnimationFrame(now time.Time) int {
-	return int(now.UnixNano() / int64(monsterFrameDuration) % 2)
+func timedAnimationFrame(now time.Time) int {
+	return int(now.UnixNano() / int64(monsterFrameDuration))
 }
 
 func guidanceFor(current *game.Game) map[game.Point]rune {

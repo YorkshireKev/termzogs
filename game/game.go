@@ -37,6 +37,7 @@ func (current *Game) Start() {
 	if len(path)+2 > capacity {
 		capacity = len(path) + 2
 	}
+
 	current.Player = Player{Position: current.Maze.Start, Facing: Point{Y: 1}, Energy: InitialEnergy, MaxEnergy: capacity}
 	current.State = StatePlaying
 	current.SetStatusMessage("")

@@ -24,32 +24,36 @@ func TestLocalCellPatternsMatchViewportCellSize(t *testing.T) {
 	}
 }
 
-func TestMonsterAnimationAlternatesFramesOnTimer(t *testing.T) {
-	for _, test := range []struct {
-		at   time.Duration
-		want int
-	}{
-		{at: 0, want: 0},
-		{at: monsterFrameDuration - time.Nanosecond, want: 0},
-		{at: monsterFrameDuration, want: 1},
-		{at: 2 * monsterFrameDuration, want: 0},
-	} {
-		if got := monsterAnimationFrame(time.Unix(0, int64(test.at))); got != test.want {
-			t.Errorf("animation frame at %s = %d, want %d", test.at, got, test.want)
+func TestTimedAnimationFramesAdvanceEachInterval(t *testing.T) {
+	for frame := 0; frame < 4; frame++ {
+		at := time.Duration(frame) * monsterFrameDuration
+		if got := timedAnimationFrame(time.Unix(0, int64(at))); got != frame {
+			t.Errorf("animation frame at %s = %d, want %d", at, got, frame)
+		}
+	}
+}
+
+func TestTreasurePulsesThroughThreeTimedFrames(t *testing.T) {
+	fullSize := cellPattern{"$$$$$$", "$$$$$$", "$$$$$$"}
+	smallSize := cellPattern{"      ", "  $$  ", "      "}
+	mediumSize := cellPattern{" $$$$ ", " $$$$ ", "      "}
+	if fullSize == smallSize || fullSize == mediumSize || smallSize == mediumSize {
+		t.Fatal("treasure animation should have three distinct sizes")
+	}
+	want := []cellPattern{fullSize, smallSize, mediumSize, fullSize}
+	for tick, expected := range want {
+		at := time.Duration(tick) * monsterFrameDuration
+		frame := timedAnimationFrame(time.Unix(0, int64(at)))
+		if got := localCellPatternForFrame('$', frame); got != expected {
+			t.Errorf("treasure frame at tick %d = %v, want %v", tick, got, expected)
 		}
 	}
 
-	firstFrame := localCellPatternForFrame('M', 0)
-	secondFrame := localCellPatternForFrame('M', 1)
-	if firstFrame == secondFrame {
-		t.Fatal("monster animation frames should have different poses")
-	}
-	for frameIndex, pattern := range []cellPattern{firstFrame, secondFrame} {
-		for rowIndex, row := range pattern {
-			if width := len([]rune(row)); width != ViewportCellWidth {
-				t.Errorf("frame %d row %d has width %d, want %d", frameIndex, rowIndex, width, ViewportCellWidth)
-			}
-		}
+	firstMonsterFrame := localCellPatternForFrame('M', 0)
+	secondMonsterFrame := localCellPatternForFrame('M', 1)
+	thirdMonsterFrame := localCellPatternForFrame('M', 2)
+	if firstMonsterFrame != thirdMonsterFrame || firstMonsterFrame == secondMonsterFrame {
+		t.Fatal("monster animation should continue looping through two poses")
 	}
 }
 

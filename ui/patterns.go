@@ -17,9 +17,9 @@ var localCellPatterns = map[rune][]cellPattern{
 	// Sword pickup
 	'/': {
 		{
-			"//////",
-			"//////",
-			"//////",
+			"  |   ",
+			"--+==>",
+			"  |   ",
 		},
 	},
 	// Prisoner
@@ -43,20 +43,30 @@ var localCellPatterns = map[rune][]cellPattern{
 			"MM  MM",
 		},
 	},
-	// Treasure
+	// Treasure pulses between its full and small shapes.
 	'$': {
 		{
 			"$$$$$$",
 			"$$$$$$",
 			"$$$$$$",
 		},
+		{
+			"      ",
+			"  $$  ",
+			"      ",
+		},
+		{
+			" $$$$ ",
+			" $$$$ ",
+			"      ",
+		},
 	},
 	// Food
 	'%': {
 		{
-			"%%%%%%",
-			"%%%%%%",
-			"%%%%%%",
+			"  /|  ",
+			" /%%\\ ",
+			" \\%%/ ",
 		},
 	},
 	// Wall
