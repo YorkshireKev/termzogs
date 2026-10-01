@@ -3,6 +3,7 @@ package game
 import (
 	"math/rand"
 	"testing"
+	"time"
 )
 
 func TestMoveTracksFacingDirection(t *testing.T) {
@@ -35,8 +36,8 @@ func TestMoveEnergyFoodAndDefeat(t *testing.T) {
 	current.Player.Energy = 1
 	current.Maze.Tiles[1][3] = Floor
 	current.Move(1, 0)
-	if current.State != StateDefeat || current.Player.Energy != 0 {
-		t.Fatalf("zero-energy move state = %v, energy = %d", current.State, current.Player.Energy)
+	if current.State != StateDefeat || current.DefeatCause != DefeatCauseEnergy || current.Player.Energy != 0 {
+		t.Fatalf("zero-energy move state = %v, cause = %v, energy = %d", current.State, current.DefeatCause, current.Player.Energy)
 	}
 }
 
@@ -45,6 +46,7 @@ func TestArmedCombatBreaksSwordAndRemovesZog(t *testing.T) {
 	current.Player.HasSword = true
 	current.Maze.Tiles[1][2] = Monster
 	current.Move(1, 0)
+	finishCombatForTest(t, current)
 	if current.Player.HasSword || current.ZogsSlain != 1 || current.Maze.TileAt(current.Player.Position) != Floor {
 		t.Fatal("armed combat did not remove the Zog and break the sword")
 	}
@@ -58,8 +60,9 @@ func TestUnarmedCombatUsesSeededOutcome(t *testing.T) {
 	current.rng = rand.New(rand.NewSource(1))
 	current.Maze.Tiles[1][2] = Monster
 	current.Move(1, 0)
-	if current.State != StateDefeat || current.StatusMessage != "The Zog overpowered you!" {
-		t.Fatalf("unarmed combat state = %v, message = %q", current.State, current.StatusMessage)
+	finishCombatForTest(t, current)
+	if current.State != StateDefeat || current.DefeatCause != DefeatCauseZog || current.StatusMessage != "The Zog overpowered you!" {
+		t.Fatalf("unarmed combat state = %v, cause = %v, message = %q", current.State, current.DefeatCause, current.StatusMessage)
 	}
 }
 
@@ -74,8 +77,41 @@ func TestUnarmedCombatCanWin(t *testing.T) {
 	current.rng = rand.New(rand.NewSource(seed))
 	current.Maze.Tiles[1][2] = Monster
 	current.Move(1, 0)
+	finishCombatForTest(t, current)
 	if current.State != StatePlaying || current.ZogsSlain != 1 || current.Player.Energy != InitialEnergy-41 {
 		t.Fatalf("unarmed win state = %v, kills = %d, energy = %d", current.State, current.ZogsSlain, current.Player.Energy)
+	}
+}
+
+func TestCombatOutcomeWaitsForAnimation(t *testing.T) {
+	current := NewGameWithSeed(25)
+	current.Player.HasSword = true
+	current.Maze.Tiles[1][2] = Monster
+	current.Move(1, 0)
+	startedAt := current.combatStartedAt
+	if !current.CombatInProgress() || current.ZogsSlain != 0 {
+		t.Fatal("combat should be pending without revealing its outcome")
+	}
+
+	current.Move(0, 1)
+	if current.Player.Position != (Point{X: 2, Y: 1}) || current.Player.Moves != 1 {
+		t.Fatal("player moved again during the fight animation")
+	}
+	if current.ResolveCombatIfReady(startedAt.Add(CombatAnimationDuration - time.Nanosecond)) {
+		t.Fatal("combat resolved before the animation duration elapsed")
+	}
+	if !current.ResolveCombatIfReady(startedAt.Add(CombatAnimationDuration)) {
+		t.Fatal("combat did not resolve when the animation duration elapsed")
+	}
+	if current.CombatInProgress() || current.ZogsSlain != 1 {
+		t.Fatal("combat outcome was not revealed after the animation")
+	}
+}
+
+func finishCombatForTest(t *testing.T, current *Game) {
+	t.Helper()
+	if !current.ResolveCombatIfReady(current.combatStartedAt.Add(CombatAnimationDuration)) {
+		t.Fatal("combat did not resolve")
 	}
 }
 

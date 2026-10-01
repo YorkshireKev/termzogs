@@ -32,6 +32,8 @@ func newGame(seed int64) *Game {
 // Start generates the maze and initializes the player for a new run.
 func (current *Game) Start() {
 	current.Maze = GenerateMazeWithSeed(current.seed)
+	current.combatStartedAt = time.Time{}
+	current.combatPoint = Point{}
 	path, _ := current.Maze.FindPath(current.Maze.Start, current.Maze.Treasure)
 	capacity := MaxEnergy
 	if len(path)+2 > capacity {
@@ -40,6 +42,7 @@ func (current *Game) Start() {
 
 	current.Player = Player{Position: current.Maze.Start, Facing: Point{Y: 1}, Energy: InitialEnergy, MaxEnergy: capacity}
 	current.State = StatePlaying
+	current.DefeatCause = DefeatCauseNone
 	current.SetStatusMessage("")
 	current.ZogsSlain = 0
 	current.PendingSwap = false
@@ -97,7 +100,7 @@ func (current *Game) Restart() {
 
 // Move advances the player into a walkable tile and resolves its effects.
 func (current *Game) Move(dx, dy int) {
-	if current.State != StatePlaying || current.PendingSwap {
+	if current.State != StatePlaying || current.PendingSwap || current.CombatInProgress() {
 		return
 	}
 	if absInt(dx)+absInt(dy) != 1 {
@@ -141,7 +144,8 @@ func (current *Game) Move(dx, dy int) {
 		current.Maze.Tiles[next.Y][next.X] = Floor
 		current.SetStatusMessage("You found food and restored energy.")
 	case Monster:
-		current.resolveCombat(next)
+		current.beginCombat(next)
+		return
 	}
 
 	if current.State == StatePlaying && current.Player.Position == current.Maze.Start && current.Player.HasTreasure {

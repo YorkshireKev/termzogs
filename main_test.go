@@ -39,3 +39,22 @@ func TestMapKeysOpenAndCloseExpandedView(t *testing.T) {
 		}
 	}
 }
+
+func TestCombatBlocksGameplayInputButAllowsQuit(t *testing.T) {
+	current := game.NewGameWithSeed(26)
+	current.Maze.Tiles[1][2] = game.Monster
+	handleKey(current, tcell.NewEventKey(tcell.KeyRight, 0, 0))
+	if !current.CombatInProgress() {
+		t.Fatal("stepping onto a Zog did not start combat")
+	}
+	position := current.Player.Position
+	moves := current.Player.Moves
+
+	handleKey(current, tcell.NewEventKey(tcell.KeyDown, 0, 0))
+	if current.Player.Position != position || current.Player.Moves != moves {
+		t.Fatal("movement input was accepted during combat")
+	}
+	if !handleKey(current, tcell.NewEventKey(tcell.KeyRune, 'q', 0)) {
+		t.Fatal("quit input was blocked during combat")
+	}
+}

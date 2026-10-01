@@ -68,6 +68,7 @@ func run() error {
 				return nil
 			}
 		case <-ticker.C:
+			current.ResolveCombatIfReady(time.Now())
 			draw()
 		}
 	}
@@ -84,6 +85,9 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 	}
 	if event.Key() == tcell.KeyCtrlC || event.Key() == tcell.KeyEscape || event.Rune() == 'q' || event.Rune() == 'Q' {
 		return true
+	}
+	if current.CombatInProgress() {
+		return false
 	}
 	if current.State == game.StateTitle {
 		if event.Key() == tcell.KeyRune && event.Rune() == ' ' {

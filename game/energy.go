@@ -11,6 +11,7 @@ func (game *Game) spendEnergy(amount int) {
 	if game.Player.Energy <= 0 {
 		game.Player.Energy = 0
 		game.State = StateDefeat
+		game.DefeatCause = DefeatCauseEnergy
 		game.SetStatusMessage("You ran out of energy.")
 	}
 }

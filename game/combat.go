@@ -2,7 +2,37 @@ package game
 
 // This file resolves sword-based and unarmed encounters with Zogs.
 
-import "math/rand"
+import (
+	"math/rand"
+	"time"
+)
+
+func (game *Game) CombatInProgress() bool {
+	return !game.combatStartedAt.IsZero()
+}
+
+func (game *Game) beginCombat(point Point) {
+	game.combatPoint = point
+	game.combatStartedAt = time.Now()
+	game.SetStatusMessage("Fighting the Zog...")
+}
+
+// ResolveCombatIfReady reveals the fight outcome after its animation duration.
+func (game *Game) ResolveCombatIfReady(now time.Time) bool {
+	if !game.CombatInProgress() || now.Sub(game.combatStartedAt) < CombatAnimationDuration {
+		return false
+	}
+
+	point := game.combatPoint
+	game.combatStartedAt = time.Time{}
+	game.combatPoint = Point{}
+	game.resolveCombat(point)
+	if game.State == StatePlaying && game.Player.Position == game.Maze.Start && game.Player.HasTreasure {
+		game.State = StateVictory
+		game.SetStatusMessage("You escaped with the treasure!")
+	}
+	return true
+}
 
 // resolveCombat applies armed or 50/50 unarmed combat against a Zog.
 func (game *Game) resolveCombat(point Point) {
@@ -26,5 +56,6 @@ func (game *Game) resolveCombat(point Point) {
 		return
 	}
 	game.State = StateDefeat
+	game.DefeatCause = DefeatCauseZog
 	game.SetStatusMessage("The Zog overpowered you!")
 }

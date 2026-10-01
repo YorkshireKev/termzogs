@@ -104,7 +104,16 @@ func drawLocalViewport(screen tcell.Screen, current *game.Game) {
 			world := game.Point{X: worldLeft + x, Y: worldTop + y}
 			character, style := displayAt(current, world, guidance)
 			frame := timedFrame
-			if world == current.Player.Position {
+			if current.CombatInProgress() && world == current.Player.Position {
+				character = combatSpriteForFrame(current.Player.Facing, timedFrame)
+				if character == 'M' {
+					style = blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
+					frame = timedFrame
+				} else {
+					style = blackBackgroundStyle().Foreground(tcell.ColorYellow).Bold(true)
+					frame = current.Player.Moves
+				}
+			} else if world == current.Player.Position {
 				character = playerSpriteForFacing(current.Player.Facing)
 				frame = current.Player.Moves
 			}
@@ -132,6 +141,13 @@ func playerSpriteForFacing(facing game.Point) rune {
 	default:
 		return '@'
 	}
+}
+
+func combatSpriteForFrame(facing game.Point, frame int) rune {
+	if frame%2 == 0 {
+		return 'M'
+	}
+	return playerSpriteForFacing(facing)
 }
 
 func timedAnimationFrame(now time.Time) int {

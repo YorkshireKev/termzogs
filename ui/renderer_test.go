@@ -79,6 +79,24 @@ func TestPlayerAnimationsHaveTwoFramesAndMatchFacing(t *testing.T) {
 	}
 }
 
+func TestCombatAnimationAlternatesPlayerAndZog(t *testing.T) {
+	facing := game.Point{X: -1}
+	for frame, want := range []rune{'M', '<', 'M', '<'} {
+		if got := combatSpriteForFrame(facing, frame); got != want {
+			t.Errorf("combat sprite at frame %d = %q, want %q", frame, got, want)
+		}
+	}
+}
+
+func TestDefeatHeadlineNamesZogCause(t *testing.T) {
+	if got := defeatHeadline(game.DefeatCauseZog); got != "GAME OVER - YOU WERE KILLED BY A ZOG" {
+		t.Errorf("Zog defeat headline = %q", got)
+	}
+	if got := defeatHeadline(game.DefeatCauseEnergy); got != "GAME OVER - YOU PERISHED IN THE MAZE" {
+		t.Errorf("energy defeat headline = %q", got)
+	}
+}
+
 func TestDrawAdvancesPlayerFrameWithMoveCount(t *testing.T) {
 	screen := tcell.NewSimulationScreen("")
 	if err := screen.Init(); err != nil {

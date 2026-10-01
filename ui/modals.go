@@ -35,7 +35,7 @@ func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
 	case game.StateDefeat:
 		style = blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
 		lines = []string{
-			"GAME OVER - YOU PERISHED IN THE MAZE",
+			defeatHeadline(current.DefeatCause),
 			fmt.Sprintf("Steps Taken: %d  |  Zogs Slain: %d", current.Player.Moves, current.ZogsSlain),
 			"Press R to restart  |  Q to quit",
 		}
@@ -60,6 +60,13 @@ func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
 		drawCentered(screen, width, height/2-len(lines)/2+index, line, style)
 	}
 	return true
+}
+
+func defeatHeadline(cause game.DefeatCause) string {
+	if cause == game.DefeatCauseZog {
+		return "GAME OVER - YOU WERE KILLED BY A ZOG"
+	}
+	return "GAME OVER - YOU PERISHED IN THE MAZE"
 }
 
 // drawCentered places a clipped text line at the horizontal screen midpoint.
