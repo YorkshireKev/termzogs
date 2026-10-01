@@ -53,6 +53,65 @@ func TestMonsterAnimationAlternatesFramesOnTimer(t *testing.T) {
 	}
 }
 
+func TestPlayerAnimationsHaveTwoFramesAndMatchFacing(t *testing.T) {
+	for _, sprite := range []rune{'<', '>', '@'} {
+		if frames := localCellPatterns[sprite]; len(frames) != 2 {
+			t.Errorf("player sprite %q has %d frames, want 2", sprite, len(frames))
+		}
+	}
+
+	for _, test := range []struct {
+		facing game.Point
+		want   rune
+	}{
+		{facing: game.Point{X: -1}, want: '<'},
+		{facing: game.Point{X: 1}, want: '>'},
+		{facing: game.Point{Y: -1}, want: '@'},
+		{facing: game.Point{Y: 1}, want: '@'},
+	} {
+		if got := playerSpriteForFacing(test.facing); got != test.want {
+			t.Errorf("sprite for facing %v = %q, want %q", test.facing, got, test.want)
+		}
+	}
+}
+
+func TestDrawAdvancesPlayerFrameWithMoveCount(t *testing.T) {
+	screen := tcell.NewSimulationScreen("")
+	if err := screen.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer screen.Fini()
+
+	current := &game.Game{
+		Maze:  &game.Maze{},
+		State: game.StatePlaying,
+		Player: game.Player{
+			Position: game.Point{X: 10, Y: 10},
+		},
+	}
+
+	for moves := 0; moves < 3; moves++ {
+		current.Player.Moves = moves
+		Renderer{}.Draw(screen, current)
+		screen.Show()
+		cells, width, height := screen.GetContents()
+		viewLeft := (width - ViewportWidth*ViewportCellWidth) / 2
+		viewTop := (height - 2 - ViewportHeight*ViewportCellHeight) / 2
+		worldLeft := current.Player.Position.X - ViewportWidth/2
+		worldTop := current.Player.Position.Y - ViewportHeight/2
+		cellLeft := viewLeft + (current.Player.Position.X-worldLeft)*ViewportCellWidth
+		cellTop := viewTop + (current.Player.Position.Y-worldTop)*ViewportCellHeight
+		expected := localCellPatterns['@'][moves%len(localCellPatterns['@'])]
+		for row, expectedRow := range expected {
+			for column, want := range []rune(expectedRow) {
+				if got := cells[(cellTop+row)*width+cellLeft+column].Runes[0]; got != want {
+					t.Errorf("moves=%d player pattern at (%d, %d) = %q, want %q", moves, column, row, got, want)
+				}
+			}
+		}
+	}
+}
+
 func TestDrawAlwaysUsesBlackBackground(t *testing.T) {
 	screen := tcell.NewSimulationScreen("")
 	if err := screen.Init(); err != nil {

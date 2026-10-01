@@ -74,6 +74,37 @@ var localCellPatterns = map[rune][]cellPattern{
 			" /|\\  ",
 			" / \\  ",
 		},
+		{
+			"  O   ",
+			" /|\\  ",
+			" | |  ",
+		},
+	},
+	// Player facing left
+	'<': {
+		{
+			"  <O  ",
+			" <=|\\ ",
+			" <  \\ ",
+		},
+		{
+			"  <O  ",
+			" <=|\\ ",
+			" < /  ",
+		},
+	},
+	// Player facing right
+	'>': {
+		{
+			"  O>  ",
+			" /|=> ",
+			" /  > ",
+		},
+		{
+			"  O>  ",
+			" /|=> ",
+			"  / > ",
+		},
 	},
 	// Guidance arrow pointing right
 	'→': {

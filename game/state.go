@@ -27,6 +27,7 @@ const (
 // Player tracks the explorer's position, inventory, energy, and moves.
 type Player struct {
 	Position    Point
+	Facing      Point
 	HasSword    bool
 	HasTreasure bool
 	Energy      int

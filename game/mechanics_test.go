@@ -5,6 +5,22 @@ import (
 	"testing"
 )
 
+func TestMoveTracksFacingDirection(t *testing.T) {
+	current := NewGameWithSeed(10)
+	current.Player.Position = Point{X: 2, Y: 2}
+	current.Maze.Tiles[2][2] = Floor
+	directions := []Point{{X: 1}, {Y: 1}, {X: -1}, {Y: -1}}
+
+	for _, direction := range directions {
+		next := Point{X: current.Player.Position.X + direction.X, Y: current.Player.Position.Y + direction.Y}
+		current.Maze.Tiles[next.Y][next.X] = Floor
+		current.Move(direction.X, direction.Y)
+		if current.Player.Facing != direction {
+			t.Fatalf("facing = %v after move %v, want %v", current.Player.Facing, direction, direction)
+		}
+	}
+}
+
 func TestMoveEnergyFoodAndDefeat(t *testing.T) {
 	current := NewGameWithSeed(11)
 	current.Maze.Tiles[1][2] = Food
