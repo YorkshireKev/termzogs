@@ -2,6 +2,7 @@ package ui
 
 import (
 	"testing"
+	"time"
 
 	"termzogs/game"
 
@@ -9,10 +10,44 @@ import (
 )
 
 func TestLocalCellPatternsMatchViewportCellSize(t *testing.T) {
-	for character, pattern := range localCellPatterns {
+	for character, frames := range localCellPatterns {
+		if len(frames) == 0 {
+			t.Errorf("pattern %q has no frames", character)
+		}
+		for frameIndex, pattern := range frames {
+			for rowIndex, row := range pattern {
+				if width := len([]rune(row)); width != ViewportCellWidth {
+					t.Errorf("pattern %q frame %d row %d has width %d, want %d", character, frameIndex, rowIndex, width, ViewportCellWidth)
+				}
+			}
+		}
+	}
+}
+
+func TestMonsterAnimationAlternatesFramesOnTimer(t *testing.T) {
+	for _, test := range []struct {
+		at   time.Duration
+		want int
+	}{
+		{at: 0, want: 0},
+		{at: monsterFrameDuration - time.Nanosecond, want: 0},
+		{at: monsterFrameDuration, want: 1},
+		{at: 2 * monsterFrameDuration, want: 0},
+	} {
+		if got := monsterAnimationFrame(time.Unix(0, int64(test.at))); got != test.want {
+			t.Errorf("animation frame at %s = %d, want %d", test.at, got, test.want)
+		}
+	}
+
+	firstFrame := localCellPatternForFrame('M', 0)
+	secondFrame := localCellPatternForFrame('M', 1)
+	if firstFrame == secondFrame {
+		t.Fatal("monster animation frames should have different poses")
+	}
+	for frameIndex, pattern := range []cellPattern{firstFrame, secondFrame} {
 		for rowIndex, row := range pattern {
 			if width := len([]rune(row)); width != ViewportCellWidth {
-				t.Errorf("pattern %q row %d has width %d, want %d", character, rowIndex, width, ViewportCellWidth)
+				t.Errorf("frame %d row %d has width %d, want %d", frameIndex, rowIndex, width, ViewportCellWidth)
 			}
 		}
 	}
@@ -38,10 +73,11 @@ func TestDrawAlwaysUsesBlackBackground(t *testing.T) {
 }
 
 func TestDrawUsesCustomPatternInLocalView(t *testing.T) {
-	originalPattern := localCellPatterns['M']
-	localCellPatterns['M'] = cellPattern{"ABCDEF", "GHIJKL", "MNOPQR"}
+	originalPatterns := localCellPatterns['M']
+	customPattern := cellPattern{"ABCDEF", "GHIJKL", "MNOPQR"}
+	localCellPatterns['M'] = []cellPattern{customPattern, customPattern}
 	defer func() {
-		localCellPatterns['M'] = originalPattern
+		localCellPatterns['M'] = originalPatterns
 	}()
 
 	screen := tcell.NewSimulationScreen("")
@@ -71,7 +107,7 @@ func TestDrawUsesCustomPatternInLocalView(t *testing.T) {
 	worldTop := current.Player.Position.Y - ViewportHeight/2
 	cellLeft := viewLeft + (monster.X-worldLeft)*ViewportCellWidth
 	cellTop := viewTop + (monster.Y-worldTop)*ViewportCellHeight
-	for row, expected := range localCellPatterns['M'] {
+	for row, expected := range localCellPatterns['M'][0] {
 		for column, want := range []rune(expected) {
 			if got := cells[(cellTop+row)*width+cellLeft+column].Runes[0]; got != want {
 				t.Errorf("rendered pattern at (%d, %d) = %q, want %q", column, row, got, want)

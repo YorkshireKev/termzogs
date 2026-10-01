@@ -4,85 +4,118 @@ import "strings"
 
 type cellPattern [ViewportCellHeight]string
 
-// Edit these three six-character rows to draw local gameplay sprites.
-var localCellPatterns = map[rune]cellPattern{
+// Each character's frames are ordered from first to last animation pose.
+var localCellPatterns = map[rune][]cellPattern{
 	// Floor
 	' ': {
-		"      ",
-		"      ",
-		"      ",
+		{
+			"      ",
+			"      ",
+			"      ",
+		},
 	},
 	// Sword pickup
 	'/': {
-		"//////",
-		"//////",
-		"//////",
+		{
+			"//////",
+			"//////",
+			"//////",
+		},
 	},
 	// Prisoner
 	'P': {
-		"PPPPPP",
-		"PPPPPP",
-		"PPPPPP",
+		{
+			"PPPPPP",
+			"PPPPPP",
+			"PPPPPP",
+		},
 	},
-	// Zog
+	// Zog frames alternate its feet.
 	'M': {
-		"MMMMMM",
-		"MMMMMM",
-		"MMMMMM",
+		{
+			" M  M ",
+			"MMMMMM",
+			"M MM M",
+		},
+		{
+			" M  M ",
+			"MMMMMM",
+			"MM  MM",
+		},
 	},
 	// Treasure
 	'$': {
-		"$$$$$$",
-		"$$$$$$",
-		"$$$$$$",
+		{
+			"$$$$$$",
+			"$$$$$$",
+			"$$$$$$",
+		},
 	},
 	// Food
 	'%': {
-		"%%%%%%",
-		"%%%%%%",
-		"%%%%%%",
+		{
+			"%%%%%%",
+			"%%%%%%",
+			"%%%%%%",
+		},
 	},
 	// Wall
 	'█': {
-		"██████",
-		"██████",
-		"██████",
+		{
+			"██████",
+			"██████",
+			"██████",
+		},
 	},
 	// Player
 	'@': {
-		"  O   ",
-		" /|\\  ",
-		" / \\  ",
+		{
+			"  O   ",
+			" /|\\  ",
+			" / \\  ",
+		},
 	},
 	// Guidance arrow pointing right
 	'→': {
-		"→→→→→→",
-		"→→→→→→",
-		"→→→→→→",
+		{
+			"→→→→→→",
+			"→→→→→→",
+			"→→→→→→",
+		},
 	},
 	// Guidance arrow pointing left
 	'←': {
-		"←←←←←←",
-		"←←←←←←",
-		"←←←←←←",
+		{
+			"←←←←←←",
+			"←←←←←←",
+			"←←←←←←",
+		},
 	},
 	// Guidance arrow pointing down
 	'↓': {
-		"↓↓↓↓↓↓",
-		"↓↓↓↓↓↓",
-		"↓↓↓↓↓↓",
+		{
+			"↓↓↓↓↓↓",
+			"↓↓↓↓↓↓",
+			"↓↓↓↓↓↓",
+		},
 	},
 	// Guidance arrow pointing up
 	'↑': {
-		"↑↑↑↑↑↑",
-		"↑↑↑↑↑↑",
-		"↑↑↑↑↑↑",
+		{
+			"↑↑↑↑↑↑",
+			"↑↑↑↑↑↑",
+			"↑↑↑↑↑↑",
+		},
 	},
 }
 
 func localCellPattern(character rune) cellPattern {
-	if pattern, ok := localCellPatterns[character]; ok {
-		return pattern
+	return localCellPatternForFrame(character, 0)
+}
+
+func localCellPatternForFrame(character rune, frame int) cellPattern {
+	if frames, ok := localCellPatterns[character]; ok && len(frames) > 0 {
+		return frames[frame%len(frames)]
 	}
 	row := strings.Repeat(string(character), ViewportCellWidth)
 	return cellPattern{row, row, row}

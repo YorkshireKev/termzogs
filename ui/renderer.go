@@ -4,6 +4,7 @@ package ui
 
 import (
 	"termzogs/game"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -15,6 +16,7 @@ const (
 	ViewportCellHeight     = 3
 	ExpandedViewportWidth  = 70
 	ExpandedViewportHeight = 20
+	monsterFrameDuration   = 350 * time.Millisecond
 )
 
 // Renderer draws game state onto a tcell screen.
@@ -95,12 +97,13 @@ func drawLocalViewport(screen tcell.Screen, current *game.Game) {
 	worldLeft := current.Player.Position.X - viewWidth/2
 	worldTop := current.Player.Position.Y - viewHeight/2
 	guidance := guidanceFor(current)
+	animationFrame := monsterAnimationFrame(time.Now())
 
 	for y := 0; y < viewHeight; y++ {
 		for x := 0; x < viewWidth; x++ {
 			world := game.Point{X: worldLeft + x, Y: worldTop + y}
 			character, style := displayAt(current, world, guidance)
-			pattern := localCellPattern(character)
+			pattern := localCellPatternForFrame(character, animationFrame)
 			for blockY, row := range pattern {
 				characters := []rune(row)
 				for blockX := 0; blockX < ViewportCellWidth; blockX++ {
@@ -113,6 +116,10 @@ func drawLocalViewport(screen tcell.Screen, current *game.Game) {
 			}
 		}
 	}
+}
+
+func monsterAnimationFrame(now time.Time) int {
+	return int(now.UnixNano() / int64(monsterFrameDuration) % 2)
 }
 
 func guidanceFor(current *game.Game) map[game.Point]rune {
