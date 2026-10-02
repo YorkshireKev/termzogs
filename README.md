@@ -31,6 +31,7 @@ go test ./...
 | Y / N | Accept or decline dropping treasure to take a sword |
 | Q or Escape | Quit |
 | R | Restart after victory or defeat |
+| M | Return to the title screen after defeat |
 
 To ask a prisoner for directions, stand next to it and press the direction key toward its cell. Prisoners are in wall niches, so the player stays in place and cannot walk onto them. This costs 15 energy and displays up to 10 directional steps toward the treasure, or toward the entrance if carrying the treasure. Guidance remains visible for up to 15 movement steps or prisoner interactions.
 
@@ -47,4 +48,4 @@ The expanded view is 70 columns by 20 rows, clipped to the terminal size. Openin
 - Fighting a Zog while armed defeats it, breaks the sword, and costs 5 additional energy. Without a sword, combat is a 50/50 roll: a win costs 40 additional energy; a loss causes immediate defeat. The movement into the Zog's cell also costs 1 energy.
 - Pressing toward an adjacent prisoner triggers a shortest-path BFS hint. Hints point to the treasure before it is collected and to the entrance afterward.
 - Returning to the entrance at `(1, 1)` while carrying the treasure wins the game. Zero energy or losing unarmed combat ends the run.
-- Status messages disappear after six successful movement steps. Victory and defeat screens remain until the player restarts or quits.
+- Status messages disappear after six successful movement steps. Victory and defeat screens remain until the player restarts or quits; after defeat, M returns to the title screen.

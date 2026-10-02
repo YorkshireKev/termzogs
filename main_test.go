@@ -64,6 +64,25 @@ func TestTitleInstructionsOpenAndAnyKeyReturns(t *testing.T) {
 	}
 }
 
+func TestGameOverReturnsToTitleAndCanStartAgain(t *testing.T) {
+	for _, key := range []rune{'m', 'M'} {
+		current := game.NewGameWithSeed(23)
+		current.State = game.StateDefeat
+
+		if quit := handleKey(current, tcell.NewEventKey(tcell.KeyRune, key, 0)); quit {
+			t.Fatalf("key %q unexpectedly quit the game", key)
+		}
+		if current.State != game.StateTitle {
+			t.Fatalf("key %q set state to %v, want title", key, current.State)
+		}
+
+		handleKey(current, tcell.NewEventKey(tcell.KeyRune, ' ', 0))
+		if current.State != game.StatePlaying {
+			t.Fatalf("space after returning to title set state to %v, want playing", current.State)
+		}
+	}
+}
+
 func TestCombatBlocksGameplayInputButAllowsQuit(t *testing.T) {
 	current := game.NewGameWithSeed(26)
 	current.Maze.Tiles[1][2] = game.Monster

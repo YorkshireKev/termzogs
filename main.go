@@ -105,8 +105,13 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 		return false
 	}
 	if current.State == game.StateDefeat || current.State == game.StateVictory {
-		if event.Rune() == 'r' || event.Rune() == 'R' {
+		switch event.Rune() {
+		case 'r', 'R':
 			current.Restart()
+		case 'm', 'M':
+			if current.State == game.StateDefeat {
+				current.State = game.StateTitle
+			}
 		}
 		return false
 	}

@@ -180,6 +180,40 @@ func TestTitleLogoIsRedAndSupportingTextIsWhite(t *testing.T) {
 	}
 }
 
+func TestInstructionsPageUsesRequestedTextColors(t *testing.T) {
+	screen := tcell.NewSimulationScreen("")
+	if err := screen.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer screen.Fini()
+
+	Renderer{}.Draw(screen, &game.Game{State: game.StateInstructions})
+	screen.Show()
+	cells, width, height := screen.GetContents()
+	lines := instructionsPageLines()
+	startY := height/2 - len(lines)/2
+
+	for _, test := range []struct {
+		line       int
+		foreground tcell.Color
+	}{
+		{line: 0, foreground: tcell.ColorRed},
+		{line: 2, foreground: tcell.ColorYellow},
+		{line: 8, foreground: tcell.ColorYellow},
+		{line: 10, foreground: tcell.ColorWhite},
+		{line: 11, foreground: tcell.ColorWhite},
+		{line: 13, foreground: tcell.ColorYellow},
+		{line: 14, foreground: tcell.ColorYellow},
+	} {
+		x := (width - len([]rune(lines[test.line]))) / 2
+		cell := cells[(startY+test.line)*width+x]
+		foreground, _, _ := cell.Style.Decompose()
+		if foreground != test.foreground {
+			t.Errorf("line %q has foreground %v, want %v", lines[test.line], foreground, test.foreground)
+		}
+	}
+}
+
 func TestDrawAdvancesPlayerFrameWithMoveCount(t *testing.T) {
 	screen := tcell.NewSimulationScreen("")
 	if err := screen.Init(); err != nil {

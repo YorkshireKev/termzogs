@@ -40,7 +40,7 @@ func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
 		lines = []string{
 			defeatHeadline(current.DefeatCause),
 			fmt.Sprintf("Steps Taken: %d  |  Zogs Slain: %d", current.Player.Moves, current.ZogsSlain),
-			"Press R to restart  |  Q to quit",
+			"R: restart  |  M: main menu  |  Q: quit",
 		}
 	case game.StatePlaying:
 		if !current.PendingSwap {
@@ -62,7 +62,14 @@ func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
 	for index, line := range lines {
 		lineStyle := style
 		y := height/2 - len(lines)/2 + index
-		if current.State == game.StateTitle && index < titleGlyphHeight {
+		if current.State == game.StateInstructions {
+			switch index {
+			case 0:
+				lineStyle = blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
+			case 2, 3, 4, 5, 6, 7, 8, 13, 14:
+				lineStyle = blackBackgroundStyle().Foreground(tcell.ColorYellow).Bold(true)
+			}
+		} else if current.State == game.StateTitle && index < titleGlyphHeight {
 			lineStyle = blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
 		} else if current.State == game.StateTitle && index == titleGlyphHeight {
 			lineStyle = blackBackgroundStyle().Foreground(tcell.ColorBlue).Bold(true)
