@@ -31,6 +31,7 @@ func run() error {
 		return fmt.Errorf("initialize terminal screen: %w", err)
 	}
 	defer screen.Fini()
+	screen.DisableMouse()
 
 	screen.SetTitle("TermZogs")
 	current := game.NewTitleGame()

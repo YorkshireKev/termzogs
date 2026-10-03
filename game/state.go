@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	// InitialEnergy and MaxEnergy define the starting and capacity values.
-	InitialEnergy         = 200
-	MaxEnergy             = 300
-	StatusMessageLifetime = 6
+	// InitialEnergy, FoodPlacementBaselineEnergy, and MaxEnergy define energy tuning.
+	InitialEnergy               = 250
+	FoodPlacementBaselineEnergy = 200
+	MaxEnergy                   = 300
+	StatusMessageLifetime       = 6
 
 	MazeViewMinCredits      = 30
 	MazeViewCost            = 20

@@ -85,6 +85,10 @@ func TestGeneratedMazeHasClosedBoundaryAndConnectedPassages(t *testing.T) {
 }
 
 func TestGeneratedMazeSwordAndFoodCountsAcrossSeeds(t *testing.T) {
+	if InitialEnergy != 250 || FoodPlacementBaselineEnergy != 200 {
+		t.Fatalf("starting energy=%d and food-placement baseline=%d; want 250 and 200", InitialEnergy, FoodPlacementBaselineEnergy)
+	}
+
 	for seed := int64(0); seed < 100; seed++ {
 		maze := GenerateMazeWithSeed(seed)
 		counts := map[Tile]int{}
@@ -158,6 +162,9 @@ func TestGeneratedSafeRouteCanBeCompletedWithEnergy(t *testing.T) {
 			capacity = len(path) + 2
 		}
 		current := NewGameWithSeed(seed)
+		if current.Player.Energy != 250 {
+			t.Fatalf("seed %d starts with %d energy, want 250", seed, current.Player.Energy)
+		}
 		if current.Player.MaxEnergy != capacity {
 			t.Fatalf("seed %d capacity = %d, want %d", seed, current.Player.MaxEnergy, capacity)
 		}

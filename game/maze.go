@@ -211,7 +211,7 @@ func placePrisoners(rng *rand.Rand, maze *Maze, count int) {
 
 // placeFood guarantees enough energy pickups for the route and its armed encounters.
 func placeFood(rng *rand.Rand, maze *Maze, path []Point, routeEncounters int) {
-	foodNeeded := (2*len(path) + 1 + 5*routeEncounters - InitialEnergy + 49) / 50
+	foodNeeded := (2*len(path) + 1 + 5*routeEncounters - FoodPlacementBaselineEnergy + 49) / 50
 	if foodNeeded < 0 {
 		foodNeeded = 0
 	}
