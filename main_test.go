@@ -83,7 +83,23 @@ func TestGameOverReturnsToTitleAndCanStartAgain(t *testing.T) {
 	}
 }
 
-func TestCombatBlocksGameplayInputButAllowsQuit(t *testing.T) {
+func TestPlayingQuitKeysReturnToTitle(t *testing.T) {
+	for _, event := range []*tcell.EventKey{
+		tcell.NewEventKey(tcell.KeyRune, 'q', 0),
+		tcell.NewEventKey(tcell.KeyRune, 'Q', 0),
+		tcell.NewEventKey(tcell.KeyEscape, 0, 0),
+	} {
+		current := game.NewGameWithSeed(27)
+		if quit := handleKey(current, event); quit {
+			t.Fatalf("key %v exited the program instead of returning to title", event)
+		}
+		if current.State != game.StateTitle {
+			t.Fatalf("key %v set state to %v, want title", event, current.State)
+		}
+	}
+}
+
+func TestCombatBlocksGameplayInputButAllowsReturningToTitle(t *testing.T) {
 	current := game.NewGameWithSeed(26)
 	current.Maze.Tiles[1][2] = game.Monster
 	handleKey(current, tcell.NewEventKey(tcell.KeyRight, 0, 0))
@@ -97,7 +113,7 @@ func TestCombatBlocksGameplayInputButAllowsQuit(t *testing.T) {
 	if current.Player.Position != position || current.Player.Moves != moves {
 		t.Fatal("movement input was accepted during combat")
 	}
-	if !handleKey(current, tcell.NewEventKey(tcell.KeyRune, 'q', 0)) {
-		t.Fatal("quit input was blocked during combat")
+	if handleKey(current, tcell.NewEventKey(tcell.KeyRune, 'q', 0)) || current.State != game.StateTitle {
+		t.Fatal("quit input during combat did not return to title")
 	}
 }

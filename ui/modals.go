@@ -28,7 +28,7 @@ func drawOverlayAt(screen tcell.Screen, current *game.Game, now time.Time) bool 
 	style := blackBackgroundStyle().Foreground(tcell.ColorWhite).Bold(true)
 	switch current.State {
 	case game.StateTitle:
-		lines = append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
+		lines = append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "v1.0.0", "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
 	case game.StateInstructions:
 		lines = instructionsPageLines()
 	case game.StateVictory:
@@ -76,10 +76,10 @@ func drawOverlayAt(screen tcell.Screen, current *game.Game, now time.Time) bool 
 			}
 		} else if current.State == game.StateTitle && index < titleGlyphHeight {
 			lineStyle = blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
-		} else if current.State == game.StateTitle && index == titleGlyphHeight {
+		} else if current.State == game.StateTitle && index >= titleGlyphHeight && index <= titleGlyphHeight+1 {
 			lineStyle = blackBackgroundStyle().Foreground(tcell.ColorBlue).Bold(true)
 		}
-		if current.State == game.StateTitle && index <= titleGlyphHeight {
+		if current.State == game.StateTitle && index <= titleGlyphHeight+1 {
 			y--
 		}
 		drawCentered(screen, width, y, line, lineStyle)
@@ -144,13 +144,13 @@ func instructionsPageLines() []string {
 		"Face a prisoner in a wall niche to ask for directions (cost: 15 energy).",
 		"Guidance points to treasure, or to the entrance while carrying it.",
 		"",
-		"ARROWS / WASD Move     V/M Expanded map",
+		"ARROWS / WASD Move     V/M Expanded map     Q/ESC Menu while playing",
 		"SHIFT-D Drop item     Y/N Answer sword-swap prompt",
 		"",
 		"Termzogs is heavily inspired by the superb Sinclair ZX81 game",
 		"Mazogs by Don Priestley.",
 		"",
-		"Press any key to return to title",
+		"Press any key to return to title screen",
 	}
 }
 

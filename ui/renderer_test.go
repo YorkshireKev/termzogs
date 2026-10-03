@@ -156,7 +156,7 @@ func TestTitleLogoIsRedAndSupportingTextIsWhite(t *testing.T) {
 	drawOverlayAt(screen, &game.Game{State: game.StateTitle}, time.Unix(0, 0))
 	screen.Show()
 	cells, width, height := screen.GetContents()
-	titleLines := append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
+	titleLines := append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "v1.0.0", "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
 	startY := height/2 - len(titleLines)/2
 	logoX := (width - titleArtWidth) / 2
 	logoCell := cells[(startY-1)*width+logoX]
@@ -173,8 +173,16 @@ func TestTitleLogoIsRedAndSupportingTextIsWhite(t *testing.T) {
 		t.Errorf("copyright cell = %q with foreground %v, want blue ©", copyrightCell.Runes, copyrightForeground)
 	}
 
-	subtitleY := startY + titleGlyphHeight + 2
-	subtitleX := (width - len(titleLines[titleGlyphHeight+2])) / 2
+	version := titleLines[titleGlyphHeight+1]
+	versionX := (width - len([]rune(version))) / 2
+	versionCell := cells[(startY+titleGlyphHeight)*width+versionX]
+	versionForeground, _, _ := versionCell.Style.Decompose()
+	if len(versionCell.Runes) == 0 || versionCell.Runes[0] != 'v' || versionForeground != tcell.ColorBlue {
+		t.Errorf("version cell = %q with foreground %v, want blue v", versionCell.Runes, versionForeground)
+	}
+
+	subtitleY := startY + titleGlyphHeight + 3
+	subtitleX := (width - len(titleLines[titleGlyphHeight+3])) / 2
 	subtitleCell := cells[subtitleY*width+subtitleX]
 	subtitleForeground, _, _ := subtitleCell.Style.Decompose()
 	if len(subtitleCell.Runes) == 0 || subtitleCell.Runes[0] != 'F' || subtitleForeground != tcell.ColorWhite {
