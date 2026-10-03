@@ -4,6 +4,7 @@ package ui
 
 import (
 	"fmt"
+	"time"
 	"unicode/utf8"
 
 	"termzogs/game"
@@ -14,6 +15,10 @@ import (
 // DrawOverlay renders title, item-confirmation, victory, or defeat overlays.
 // It returns true when the overlay replaces the normal game view.
 func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
+	return drawOverlayAt(screen, current, time.Now())
+}
+
+func drawOverlayAt(screen tcell.Screen, current *game.Game, now time.Time) bool {
 	width, height := screen.Size()
 	if width <= 0 || height <= 0 || current == nil {
 		return true
@@ -79,14 +84,28 @@ func DrawOverlay(screen tcell.Screen, current *game.Game) bool {
 		}
 		drawCentered(screen, width, y, line, lineStyle)
 	}
+	if current.State == game.StateTitle && screenTooSmall(width, height) && screenSizeWarningVisible(now) {
+		warningStyle := blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
+		drawCentered(screen, width, height-2, "SCREEN TOO SMALL", warningStyle)
+		drawCentered(screen, width, height-1, "FULL VIEW: 60x20", warningStyle)
+	}
 	return true
 }
 
+func screenTooSmall(width, height int) bool {
+	return width < MinimumScreenWidth || height < MinimumScreenHeight
+}
+
+func screenSizeWarningVisible(now time.Time) bool {
+	return (now.UnixNano()/int64(screenSizeWarningFlashInterval))%2 == 0
+}
+
 const (
-	titleGlyphWidth  = 6
-	titleGlyphHeight = 5
-	titleWord        = "TERMZOGS"
-	titleArtWidth    = len(titleWord)*titleGlyphWidth + len(titleWord) - 1
+	titleGlyphWidth                = 6
+	titleGlyphHeight               = 5
+	titleWord                      = "TERMZOGS"
+	titleArtWidth                  = len(titleWord)*titleGlyphWidth + len(titleWord) - 1
+	screenSizeWarningFlashInterval = 500 * time.Millisecond
 )
 
 var titleGlyphs = map[rune][titleGlyphHeight]string{

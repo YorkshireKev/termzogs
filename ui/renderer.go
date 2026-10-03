@@ -17,6 +17,8 @@ const (
 	ExpandedViewportWidth  = 70
 	ExpandedViewportHeight = 20
 	monsterFrameDuration   = 350 * time.Millisecond
+	MinimumScreenWidth     = ViewportWidth * ViewportCellWidth
+	MinimumScreenHeight    = ViewportHeight*ViewportCellHeight + 2
 )
 
 // Renderer draws game state onto a tcell screen.

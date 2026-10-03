@@ -21,6 +21,8 @@ At the title screen, press Space to generate and start a maze. To run the tests:
 go test ./...
 ```
 
+The full-size local game view requires a terminal at least 60 columns by 20 rows. A warning appears on the title screen if the terminal is smaller.
+
 ## Controls
 
 | Key | Action |

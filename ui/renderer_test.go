@@ -151,7 +151,9 @@ func TestTitleLogoIsRedAndSupportingTextIsWhite(t *testing.T) {
 	}
 	defer screen.Fini()
 
-	Renderer{}.Draw(screen, &game.Game{State: game.StateTitle})
+	screen.SetStyle(blackBackgroundStyle())
+	screen.Clear()
+	drawOverlayAt(screen, &game.Game{State: game.StateTitle}, time.Unix(0, 0))
 	screen.Show()
 	cells, width, height := screen.GetContents()
 	titleLines := append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
@@ -177,6 +179,82 @@ func TestTitleLogoIsRedAndSupportingTextIsWhite(t *testing.T) {
 	subtitleForeground, _, _ := subtitleCell.Style.Decompose()
 	if len(subtitleCell.Runes) == 0 || subtitleCell.Runes[0] != 'F' || subtitleForeground != tcell.ColorWhite {
 		t.Errorf("subtitle cell = %q with foreground %v, want white F", subtitleCell.Runes, subtitleForeground)
+	}
+}
+
+func TestTitleWarnsWhenScreenIsTooSmall(t *testing.T) {
+	screen := tcell.NewSimulationScreen("")
+	if err := screen.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer screen.Fini()
+
+	screen.SetSize(MinimumScreenWidth-1, MinimumScreenHeight)
+	screen.SetStyle(blackBackgroundStyle())
+	screen.Clear()
+	drawOverlayAt(screen, &game.Game{State: game.StateTitle}, time.Unix(0, 0))
+	screen.Show()
+	cells, width, height := screen.GetContents()
+	for row, want := range []string{"SCREEN TOO SMALL", "FULL VIEW: 60x20"} {
+		y := height - 2 + row
+		got := make([]rune, len([]rune(want)))
+		startX := (width - len(got)) / 2
+		for index := range got {
+			got[index] = cells[y*width+startX+index].Runes[0]
+		}
+		if string(got) != want {
+			t.Errorf("warning row %d = %q, want %q", row, string(got), want)
+		}
+	}
+
+	screen.SetStyle(blackBackgroundStyle())
+	screen.Clear()
+	drawOverlayAt(screen, &game.Game{State: game.StateTitle}, time.Unix(0, int64(screenSizeWarningFlashInterval)))
+	screen.Show()
+	cells, width, height = screen.GetContents()
+	for y := height - 2; y < height; y++ {
+		for x := 0; x < width; x++ {
+			if character := cells[y*width+x].Runes[0]; character != ' ' {
+				t.Fatalf("warning remained visible in off phase at (%d, %d): %q", x, y, character)
+			}
+		}
+	}
+}
+
+func TestTitleDoesNotWarnWhenScreenFitsFullSize(t *testing.T) {
+	screen := tcell.NewSimulationScreen("")
+	if err := screen.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer screen.Fini()
+
+	screen.SetSize(MinimumScreenWidth, MinimumScreenHeight)
+	Renderer{}.Draw(screen, &game.Game{State: game.StateTitle})
+	screen.Show()
+	cells, width, height := screen.GetContents()
+	for y := height - 2; y < height; y++ {
+		for x := 0; x < width; x++ {
+			if character := cells[y*width+x].Runes[0]; character != ' ' {
+				t.Fatalf("unexpected warning character %q at (%d, %d) on a full-size screen", character, x, y)
+			}
+		}
+	}
+}
+
+func TestScreenSizeWarningFlashesEveryHalfSecond(t *testing.T) {
+	for _, test := range []struct {
+		at   time.Duration
+		want bool
+	}{
+		{at: 0, want: true},
+		{at: screenSizeWarningFlashInterval - time.Nanosecond, want: true},
+		{at: screenSizeWarningFlashInterval, want: false},
+		{at: 2*screenSizeWarningFlashInterval - time.Nanosecond, want: false},
+		{at: 2 * screenSizeWarningFlashInterval, want: true},
+	} {
+		if got := screenSizeWarningVisible(time.Unix(0, int64(test.at))); got != test.want {
+			t.Errorf("warning visibility at %s = %t, want %t", test.at, got, test.want)
+		}
 	}
 }
 
