@@ -179,8 +179,9 @@ func guidanceFor(current *game.Game) map[game.Point]rune {
 }
 
 func displayAt(current *game.Game, world game.Point, guidance map[game.Point]rune) (rune, tcell.Style) {
-	character, style := tileAppearance(current.Maze.TileAt(world))
-	if arrow, ok := guidance[world]; ok {
+	tile := current.Maze.TileAt(world)
+	character, style := tileAppearance(tile)
+	if arrow, ok := guidance[world]; ok && tile == game.Floor {
 		character = arrow
 		style = blackBackgroundStyle().Foreground(tcell.ColorAqua).Bold(true)
 	}

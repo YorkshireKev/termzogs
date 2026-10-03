@@ -422,6 +422,9 @@ func TestDrawRendersGuidanceArrowsAlongPathTurns(t *testing.T) {
 			{X: 11, Y: 12},
 		},
 	}
+	for _, point := range current.GuidancePath {
+		current.Maze.Tiles[point.Y][point.X] = game.Floor
+	}
 
 	Renderer{}.Draw(screen, current)
 	screen.Show()
@@ -447,6 +450,34 @@ func TestDrawRendersGuidanceArrowsAlongPathTurns(t *testing.T) {
 					t.Errorf("rendered path block %v at (%d, %d) = %q, want %q", point, column, row, got, want)
 				}
 			}
+		}
+	}
+}
+
+func TestGuidanceArrowsDoNotCoverMazeObjects(t *testing.T) {
+	current := &game.Game{
+		Maze: &game.Maze{},
+		Player: game.Player{
+			Position: game.Point{X: 1, Y: 1},
+		},
+	}
+	guidance := map[game.Point]rune{{X: 2, Y: 1}: '→'}
+
+	for _, test := range []struct {
+		tile game.Tile
+		want rune
+	}{
+		{tile: game.Floor, want: '→'},
+		{tile: game.Monster, want: 'M'},
+		{tile: game.Sword, want: '/'},
+		{tile: game.Food, want: '%'},
+		{tile: game.Treasure, want: '$'},
+		{tile: game.Prisoner, want: 'P'},
+	} {
+		current.Maze.Tiles[1][2] = test.tile
+		got, _ := displayAt(current, game.Point{X: 2, Y: 1}, guidance)
+		if got != test.want {
+			t.Errorf("displayAt tile %v = %q, want %q", test.tile, got, test.want)
 		}
 	}
 }
