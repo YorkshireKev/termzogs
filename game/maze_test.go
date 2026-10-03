@@ -74,13 +74,31 @@ func TestGeneratedMazeHasClosedBoundaryAndConnectedPassages(t *testing.T) {
 			}
 		}
 	}
-	for tile, want := range map[Tile]int{Sword: 12, Prisoner: 35, Monster: 18, Treasure: 1} {
+	for tile, want := range map[Tile]int{Sword: 18, Prisoner: 35, Monster: 18, Treasure: 1} {
 		if counts[tile] != want {
 			t.Errorf("tile %d count = %d, want %d", tile, counts[tile], want)
 		}
 	}
-	if counts[Food] < 8 || counts[Food] > 12 {
-		t.Errorf("food count = %d, want 8 through 12", counts[Food])
+	if counts[Food] < 15 || counts[Food] > 20 {
+		t.Errorf("food count = %d, want 15 through 20", counts[Food])
+	}
+}
+
+func TestGeneratedMazeSwordAndFoodCountsAcrossSeeds(t *testing.T) {
+	for seed := int64(0); seed < 100; seed++ {
+		maze := GenerateMazeWithSeed(seed)
+		counts := map[Tile]int{}
+		for _, row := range maze.Tiles {
+			for _, tile := range row {
+				counts[tile]++
+			}
+		}
+		if counts[Sword] != 18 {
+			t.Errorf("seed %d has %d swords, want 18", seed, counts[Sword])
+		}
+		if counts[Food] < 15 || counts[Food] > 20 {
+			t.Errorf("seed %d has %d food pickups, want 15 through 20", seed, counts[Food])
+		}
 	}
 }
 

@@ -99,10 +99,10 @@ func GenerateMazeWithSeed(seed int64) *Maze {
 			placed++
 		}
 	}
-	place(Sword, 10)
+	place(Sword, 16)
 	placePrisoners(rng, maze, 35)
-	placeFood(rng, maze, path, 2)
 	placeRouteEncounters(maze, path)
+	placeFood(rng, maze, path, 2)
 	place(Monster, 16)
 
 	return maze
@@ -215,13 +215,26 @@ func placeFood(rng *rand.Rand, maze *Maze, path []Point, routeEncounters int) {
 	if foodNeeded < 0 {
 		foodNeeded = 0
 	}
+
 	for index := 0; index < foodNeeded; index++ {
 		pathIndex := (index + 1) * (len(path) - 2) / foodNeeded
 		if index == foodNeeded-1 {
 			pathIndex = len(path) - 2
 		}
-		point := path[pathIndex]
-		maze.Tiles[point.Y][point.X] = Food
+		placed := false
+		for distance := 0; distance < len(path) && !placed; distance++ {
+			for _, candidateIndex := range [...]int{pathIndex - distance, pathIndex + distance} {
+				if candidateIndex <= 0 || candidateIndex >= len(path)-1 {
+					continue
+				}
+				point := path[candidateIndex]
+				if maze.TileAt(point) == Floor {
+					maze.Tiles[point.Y][point.X] = Food
+					placed = true
+					break
+				}
+			}
+		}
 	}
 
 	deadEnds := make([]Point, 0)
@@ -243,7 +256,7 @@ func placeFood(rng *rand.Rand, maze *Maze, path []Point, routeEncounters int) {
 		}
 	}
 
-	count := 8 + rng.Intn(5)
+	count := 15 + rng.Intn(6)
 	if count < foodNeeded {
 		count = foodNeeded
 	}

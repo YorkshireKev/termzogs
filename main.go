@@ -68,7 +68,9 @@ func run() error {
 				return nil
 			}
 		case <-ticker.C:
-			current.ResolveCombatIfReady(time.Now())
+			now := time.Now()
+			current.ResolveCombatIfReady(now)
+			current.UpdateZogs(now)
 			draw()
 		}
 	}

@@ -32,6 +32,8 @@ func newGame(seed int64) *Game {
 // Start generates the maze and initializes the player for a new run.
 func (current *Game) Start() {
 	current.Maze = GenerateMazeWithSeed(current.seed)
+	current.zogPatrols = createZogPatrols(current.Maze, current.seed)
+	current.nextZogMoveAt = time.Now().Add(ZogMoveInterval)
 	current.combatStartedAt = time.Time{}
 	current.combatPoint = Point{}
 	path, _ := current.Maze.FindPath(current.Maze.Start, current.Maze.Treasure)

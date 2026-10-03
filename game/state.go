@@ -15,6 +15,7 @@ const (
 	MazeViewMinCredits      = 30
 	MazeViewCost            = 20
 	CombatAnimationDuration = 2 * time.Second
+	ZogMoveInterval         = time.Second
 )
 
 // GameState identifies the current screen and whether play can continue.
@@ -63,6 +64,8 @@ type Game struct {
 	ExpandedView       bool
 	combatStartedAt    time.Time
 	combatPoint        Point
+	zogPatrols         []zogPatrol
+	nextZogMoveAt      time.Time
 	rng                *rand.Rand
 	seed               int64
 }
