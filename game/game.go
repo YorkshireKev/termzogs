@@ -170,6 +170,14 @@ func (current *Game) DropItem() {
 		return
 	}
 	point := current.Player.Position
+	if !current.Player.HasSword && !current.Player.HasTreasure {
+		current.SetStatusMessage("You have nothing to drop.")
+		return
+	}
+	if current.Maze.TileAt(point) != Floor {
+		current.SetStatusMessage("You can't drop an item on an occupied tile.")
+		return
+	}
 	switch {
 	case current.Player.HasSword:
 		current.Maze.Tiles[point.Y][point.X] = Sword
@@ -179,8 +187,6 @@ func (current *Game) DropItem() {
 		current.Maze.Tiles[point.Y][point.X] = Treasure
 		current.Player.HasTreasure = false
 		current.SetStatusMessage("You dropped the treasure.")
-	default:
-		current.SetStatusMessage("You have nothing to drop.")
 	}
 }
 

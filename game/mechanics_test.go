@@ -184,6 +184,25 @@ func TestDropItemLeavesItOnCurrentCell(t *testing.T) {
 	}
 }
 
+func TestDropSwordOnTreasureKeepsBothSwordAndTreasure(t *testing.T) {
+	current := NewGameWithSeed(18)
+	point := current.Player.Position
+	current.Maze.Tiles[point.Y][point.X] = Treasure
+	current.Player.HasSword = true
+
+	current.DropItem()
+
+	if !current.Player.HasSword {
+		t.Fatal("sword should remain in inventory when the drop is blocked")
+	}
+	if got := current.Maze.TileAt(point); got != Treasure {
+		t.Fatalf("tile after blocked sword drop = %v, want treasure", got)
+	}
+	if current.StatusMessage != "You can't drop an item on an occupied tile." {
+		t.Fatalf("blocked-drop message = %q", current.StatusMessage)
+	}
+}
+
 func TestExpandedMazeViewCostsCreditsAndEnforcesMinimum(t *testing.T) {
 	current := NewGameWithSeed(19)
 	current.ToggleMazeView()
