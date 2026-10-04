@@ -4,7 +4,7 @@ TermZogs is a terminal maze crawler written in Go with `tcell`. Explore the maze
 
 ## Requirements
 
-- Go 1.20 or later
+- Go 1.23 or later
 - An ANSI-compatible terminal with UTF-8 support
 
 ## Run

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>termzogs</title>
+	<script src="wasm_exec.js"></script>
+	<link rel="stylesheet" href="termstyle.css">
+
+</head>
+
+<body>
+	<div id="info">
+		<a href="https://www.kevssite.com/termzogs-game">www.kevssite.com</a> | <a
+			href="https://github.com/YorkshireKev/termzogs">GitHub Repo</a>
+	</div>
+	<div id="terminal-container">
+		<pre id="terminal"></pre>
+	</div>
+	<script src="tcell.js"></script>
+	<script src="keys.js"></script>
+
+	<div id="keys">
+		<img src="images/esc.png" onclick="emulateKeyPress('Escape', 27)" />
+		<img src="images/gap.png" />
+		<img src="images/5.png" onclick="emulateKeyPress('ArrowLeft', 37)" />
+		<img src="images/7.png" onclick="emulateKeyPress('ArrowUp', 38)" />
+		<img src="images/8.png" onclick="emulateKeyPress('ArrowRight', 39)" />
+		<img src="images/gap.png" />
+		<img src="images/s.png" onclick="emulateKeyPress('s', 83)" />
+		<img src="images/m.png" onclick="emulateKeyPress('m', 77)" />
+		<img src="images/l.png" onclick="emulateKeyPress('l', 76)" />
+	</div>
+</body>
+
+</html>
