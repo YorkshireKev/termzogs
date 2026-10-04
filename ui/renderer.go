@@ -236,6 +236,12 @@ func drawText(screen tcell.Screen, x, y, screenWidth int, text string, style tce
 	if y < 0 || y >= screenHeight {
 		return
 	}
+	if text == "" {
+		if x >= 0 && x < screenWidth {
+			screen.SetContent(x, y, ' ', nil, style)
+		}
+		return
+	}
 	for _, character := range text {
 		if x >= screenWidth {
 			return

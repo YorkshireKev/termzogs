@@ -131,7 +131,7 @@ func TestInstructionsPageIncludesControlsAndAttribution(t *testing.T) {
 		"V/M Expanded map",
 		"Y/N",
 		"Mazogs by Don Priestley",
-		"Press I or ESC to return to title",
+		"Press any key to return to title screen",
 	} {
 		if !strings.Contains(page, expected) {
 			t.Errorf("instructions page is missing %q", expected)
@@ -279,23 +279,18 @@ func TestInstructionsPageUsesRequestedTextColors(t *testing.T) {
 	lines := instructionsPageLines()
 	startY := height/2 - len(lines)/2
 
-	for _, test := range []struct {
-		line       int
-		foreground tcell.Color
-	}{
-		{line: 0, foreground: tcell.ColorRed},
-		{line: 2, foreground: tcell.ColorYellow},
-		{line: 8, foreground: tcell.ColorYellow},
-		{line: 10, foreground: tcell.ColorWhite},
-		{line: 11, foreground: tcell.ColorWhite},
-		{line: 13, foreground: tcell.ColorYellow},
-		{line: 14, foreground: tcell.ColorYellow},
-	} {
-		x := (width - len([]rune(lines[test.line]))) / 2
-		cell := cells[(startY+test.line)*width+x]
+	for lineIndex, line := range lines {
+		want := tcell.ColorYellow
+		if lineIndex == 0 {
+			want = tcell.ColorRed
+		} else if lineIndex == 11 || lineIndex == 12 || lineIndex == 17 {
+			want = tcell.ColorWhite
+		}
+		x := (width - len([]rune(line))) / 2
+		cell := cells[(startY+lineIndex)*width+x]
 		foreground, _, _ := cell.Style.Decompose()
-		if foreground != test.foreground {
-			t.Errorf("line %q has foreground %v, want %v", lines[test.line], foreground, test.foreground)
+		if foreground != want {
+			t.Errorf("line %q has foreground %v, want %v", line, foreground, want)
 		}
 	}
 }

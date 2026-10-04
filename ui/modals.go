@@ -71,7 +71,9 @@ func drawOverlayAt(screen tcell.Screen, current *game.Game, now time.Time) bool 
 			switch index {
 			case 0:
 				lineStyle = blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
-			case 2, 3, 4, 5, 6, 7, 8, 13, 14:
+			case 11, 12, 17:
+				lineStyle = blackBackgroundStyle().Foreground(tcell.ColorWhite).Bold(true)
+			default:
 				lineStyle = blackBackgroundStyle().Foreground(tcell.ColorYellow).Bold(true)
 			}
 		} else if current.State == game.StateTitle && index < titleGlyphHeight {
@@ -136,13 +138,14 @@ func instructionsPageLines() []string {
 	return []string{
 		"HOW TO PLAY TERMZOGS",
 		"",
-		"Find the treasure near the maze center and return to the entrance.",
-		"Each move costs 1 energy. Food restores 50 energy.",
-		"Armed: defeat Zogs with a sword; it breaks and combat costs 5 more.",
-		"Unarmed fights are 50/50: victory costs 40 energy; defeat ends the run.",
-		"You can carry a sword or treasure, but not both.",
-		"Face a prisoner in a wall niche to ask for directions (cost: 15 energy).",
-		"Guidance points to treasure, or to the entrance while carrying it.",
+		"Deep in the labyrinth lies an ancient Treasure. Your goal is to steel it",
+		"and escape back to the maze entrance. Beware of the Zogs that patrol the",
+		"corridors! Facing one without a weapon is a desperate gamble. Arm yourself",
+		"with a Sword to strike them down. Prisoners trapped in the walls will guide",
+		"you toward the treasure or back to the exit when you're escaping.",
+		"Exploration takes a toll. Scavenge Food lying around the maze to keep your",
+		"energy up and avoid perishing. You can only hold one item at a time: either",
+		"a Sword to protect yourself or the Treasure to win the game.",
 		"",
 		"ARROWS / WASD Move     V/M Expanded map     Q/ESC Menu while playing",
 		"SHIFT-D Drop item     Y/N Answer sword-swap prompt",
