@@ -93,11 +93,11 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 	if event.Key() == tcell.KeyCtrlC {
 		return true
 	}
-	if current.State == game.StatePlaying && (event.Rune() == 'q' || event.Rune() == 'Q' || event.Key() == tcell.KeyEscape) {
+	if current.State != game.StateTitle && (event.Rune() == 'q' || event.Rune() == 'Q' || event.Key() == tcell.KeyEscape) {
 		current.State = game.StateTitle
 		return false
 	}
-	if event.Rune() == 'q' || event.Rune() == 'Q' || event.Key() == tcell.KeyEscape {
+	if current.State == game.StateTitle && (event.Rune() == 'q' || event.Rune() == 'Q' || event.Key() == tcell.KeyEscape) {
 		return true
 	}
 	if current.CombatInProgress() {

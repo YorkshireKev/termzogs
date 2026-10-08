@@ -99,6 +99,35 @@ func TestPlayingQuitKeysReturnToTitle(t *testing.T) {
 	}
 }
 
+func TestQuitKeysExitOnlyFromTitleScreen(t *testing.T) {
+	for _, event := range []*tcell.EventKey{
+		tcell.NewEventKey(tcell.KeyRune, 'q', 0),
+		tcell.NewEventKey(tcell.KeyRune, 'Q', 0),
+		tcell.NewEventKey(tcell.KeyEscape, 0, 0),
+	} {
+		current := game.NewTitleGame()
+		if !handleKey(current, event) {
+			t.Errorf("key %v on the title screen did not exit the program", event)
+		}
+
+		for _, state := range []game.GameState{
+			game.StateInstructions,
+			game.StatePlaying,
+			game.StateDefeat,
+			game.StateVictory,
+		} {
+			current := game.NewTitleGame()
+			current.State = state
+			if quit := handleKey(current, event); quit {
+				t.Errorf("key %v in state %v exited the program", event, state)
+			}
+			if current.State != game.StateTitle {
+				t.Errorf("key %v in state %v set state to %v, want title", event, state, current.State)
+			}
+		}
+	}
+}
+
 func TestCombatBlocksGameplayInputButAllowsReturningToTitle(t *testing.T) {
 	current := game.NewGameWithSeed(26)
 	current.Maze.Tiles[1][2] = game.Monster
