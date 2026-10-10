@@ -31,7 +31,8 @@ The full-size local game view requires a terminal at least 60 columns by 20 rows
 | V or M | Open the expanded maze view |
 | Uppercase D (Shift+D) | Drop the held sword or treasure on the current cell |
 | Y / N | Accept or decline dropping treasure to take a sword |
-| Q or Escape | Quit |
+| Q | Quit |
+| Escape | Quit in terminal builds; disabled in the web version |
 | R | Restart after victory or defeat |
 | M | Return to the title screen after defeat |
 

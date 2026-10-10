@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	"termzogs/game"
@@ -79,6 +80,9 @@ func run() error {
 
 // handleKey maps quit and movement keys to game actions.
 func handleKey(current *game.Game, event *tcell.EventKey) bool {
+	if runtime.GOOS == "js" && event.Key() == tcell.KeyEscape {
+		return false
+	}
 	if current.State == game.StateInstructions {
 		current.State = game.StateTitle
 		return false
