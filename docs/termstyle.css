@@ -30,9 +30,11 @@ text-align: center;
 #terminal {
   border: 2px solid blue;
 
-  background-color: white;
+  background-color: #000;
   color: green;
   display: inline-block;
+  font-size: min(16px, 1.9vw, 2.2vh);
+  line-height: 1.2;
 
   /* Copy paste! */
   user-select: none;
@@ -59,6 +61,14 @@ text-align: center;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     touch-action: manipulation;
+}
+
+@media (max-width: 768px), (max-height: 600px) {
+  #keys img {
+    width: auto;
+    height: min(64px, 10vw, 8vh);
+    vertical-align: middle;
+  }
 }
 
 /* Style attributes */

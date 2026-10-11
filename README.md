@@ -23,6 +23,8 @@ go test ./...
 
 The full-size local game view requires a terminal at least 60 columns by 20 rows. A warning appears on the title screen if the terminal is smaller.
 
+The web build scales the terminal text to fit smaller browser windows while keeping its 80-by-24 grid.
+
 ## Controls
 
 | Key | Action |
@@ -45,11 +47,10 @@ The expanded view is 70 columns by 20 rows, clipped to the terminal size. Openin
 - The generated maze is 62 columns by 42 rows, with randomized shortcuts and open rooms connecting its branching corridors. It contains one treasure near the center, 18 swords, 35 prisoners in wall niches, and 18 Zogs. Two Zogs guard the main start-to-treasure route, each preceded by a sword; other Zogs and swords are placed off-route. It contains 15–20 food supplies, including enough on the main route to cover its armed fights.
 - Zogs move one cell per second in repeating patrol loops of 6–10 steps, kept near their starting locations. They pause while the expanded map is open.
 - The local gameplay view follows the player across 10 by 6 cells. Each cell is rendered as a 6 by 3 block of its tile character; the expanded map view remains unchanged.
-- Players start with 200 energy and can hold up to 300 on typical mazes. Capacity scales up for unusually long routes to ensure the guaranteed supplies can cover the return trip. Each successful movement costs 1 energy. Reaching 0 energy causes defeat.
-- Collecting food consumes it and restores 50 energy, up to the current energy capacity.
+- Players start with 250 energy and can hold up to 350 on typical mazes. Capacity scales up for unusually long routes to ensure the guaranteed supplies can cover the return trip. Each successful movement costs 1 energy. Reaching 0 energy causes defeat.
+- Collecting food restores 50 energy, up to the current energy capacity.
 - The player can carry a sword or the treasure, but not both. Walking over a sword while carrying the treasure prompts for confirmation. Y drops the treasure and takes the sword; N keeps the treasure. A sword encountered while already carrying a sword remains in the maze.
-- Dropping an item leaves it on the player's current cell. A sword prevents treasure pickup until it is dropped.
-- Fighting a Zog while armed defeats it, breaks the sword, and costs 5 additional energy. Without a sword, combat is a 50/50 roll: a win costs 40 additional energy; a loss causes immediate defeat. The movement into the Zog's cell also costs 1 energy.
-- Pressing toward an adjacent prisoner triggers a shortest-path BFS hint. Hints point to the treasure before it is collected and to the entrance afterward.
-- Returning to the entrance at `(1, 1)` while carrying the treasure wins the game. Zero energy or losing unarmed combat ends the run.
-- Status messages disappear after six successful movement steps. Victory and defeat screens remain until the player restarts or quits; after defeat, M returns to the title screen.
+- Dropping an item leaves it on the player's current cell. Holding a sword prevents treasure pickup until it is dropped.
+- Fighting a Zog while armed defeats it, but breaks the sword, and costs 5 additional energy. Without a sword, combat is a 50/50 roll: a win costs 40 additional energy; a loss causes immediate defeat.
+- Prisoner point the way to the treasure before it is collected and to the entrance afterward. Asking for the directions hint costs 15 energy.
+- Returning to the entrance at while carrying the treasure wins the game. Zero energy or losing unarmed combat ends the run.
