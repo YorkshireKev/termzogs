@@ -111,7 +111,7 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 		if event.Key() == tcell.KeyRune {
 			switch event.Rune() {
 			case ' ':
-				current.Start()
+				current.StartNewGame()
 			case 'i', 'I':
 				current.State = game.StateInstructions
 			}

@@ -80,6 +80,9 @@ func TestGameOverReturnsToTitleAndCanStartAgain(t *testing.T) {
 		if current.State != game.StatePlaying {
 			t.Fatalf("space after returning to title set state to %v, want playing", current.State)
 		}
+		if current.Maze == nil {
+			t.Fatal("space after returning to title did not generate a maze")
+		}
 	}
 }
 

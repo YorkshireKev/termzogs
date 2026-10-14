@@ -53,6 +53,17 @@ func (current *Game) Start() {
 	current.ExpandedView = false
 }
 
+// StartNewGame generates a new maze and initializes the player for a new run.
+func (current *Game) StartNewGame() {
+	seed := time.Now().UnixNano()
+	if seed == current.seed {
+		seed++
+	}
+	current.seed = seed
+	current.rng = rand.New(rand.NewSource(seed))
+	current.Start()
+}
+
 // SetStatusMessage displays a message until six successful movement steps pass.
 func (current *Game) SetStatusMessage(message string) {
 	current.StatusMessage = message
@@ -93,9 +104,8 @@ func (current *Game) ToggleMazeView() {
 	current.SetStatusMessage("Expanded maze view opened (-20 credits).")
 }
 
-// Restart begins a fresh run with a new maze seed.
+// Restart begins a fresh run on the current maze.
 func (current *Game) Restart() {
-	current.seed = time.Now().UnixNano()
 	current.rng = rand.New(rand.NewSource(current.seed))
 	current.Start()
 }

@@ -19,8 +19,6 @@ From the project directory:
 go run .
 ```
 
-At the title screen, press Space to generate and start a maze. To run the tests:
-
 ```sh
 go test ./...
 ```
@@ -28,6 +26,8 @@ go test ./...
 The full-size local game view requires a terminal at least 60 columns by 20 rows. A warning appears on the title screen if the terminal is smaller.
 
 The web build scales the terminal text to fit smaller browser windows while keeping its 80-by-24 grid.
+
+At the title screen, press Space to generate a new maze and start a game. Each new game gets a different maze; pressing R after victory or defeat restarts the same maze. To run the tests:
 
 ## Controls
 
