@@ -25,6 +25,16 @@ go run .
 go test ./...
 ```
 
+## Release Builds
+
+Build macOS, Linux, and Windows executables with:
+
+```sh
+./build-releases.sh
+```
+
+The script writes the macOS Intel and Apple Silicon builds, the Linux x86-64 build, and the Windows x86-64 build to `dist/`. This directory is gitignored.
+
 The full-size local game view requires a terminal at least 60 columns by 20 rows. A warning appears on the title screen if the terminal is smaller.
 
 The web build scales the terminal text to fit smaller browser windows while keeping its 80-by-24 grid.
