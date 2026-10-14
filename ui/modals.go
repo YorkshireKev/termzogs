@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"termzogs/game"
+	"termzogs/version"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -28,7 +29,7 @@ func drawOverlayAt(screen tcell.Screen, current *game.Game, now time.Time) bool 
 	style := blackBackgroundStyle().Foreground(tcell.ColorWhite).Bold(true)
 	switch current.State {
 	case game.StateTitle:
-		lines = append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "v1.0.0", "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
+		lines = append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "v"+version.Number, "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
 	case game.StateInstructions:
 		lines = instructionsPageLines()
 	case game.StateVictory:

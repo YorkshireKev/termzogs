@@ -27,13 +27,13 @@ go test ./...
 
 ## Release Builds
 
-Build macOS, Linux, and Windows executables with:
+Build the macOS, Linux, and Windows executables, plus the web/WASM version, with:
 
 ```sh
 ./build-releases.sh
 ```
 
-The script writes the macOS Intel and Apple Silicon builds, the Linux x86-64 build, and the Windows x86-64 build to `dist/`. This directory is gitignored.
+The script writes the macOS Intel and Apple Silicon builds, the Linux x86-64 build, and the Windows x86-64 build to the gitignored `dist/` directory. It also updates the web build at `docs/termzogs.wasm` and its matching Go runtime at `docs/wasm_exec.js` for deployment.
 
 The full-size local game view requires a terminal at least 60 columns by 20 rows. A warning appears on the title screen if the terminal is smaller.
 
