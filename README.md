@@ -1,5 +1,7 @@
 # TermZogs
 
+![TermZogs](termzogs.png)
+
 Termzogs is a terminal maze crawler written in Go with `tcell`. Explore the maze, find the treasure, and return to the entrance while managing energy and avoiding Zogs. This was an experiment in Vibe Coding a terminal go based game. You can read more about how it was made on by blog at [kevssite.com/termzogs-game](https://kevssite.com/termzogs-game).
 
 Termzogs is heavily influenced by the excellent ZX81 Classic game Mazogs, by Don Priestley. I should be clear, this is not a port of Mazogs, it is a much poorer game inspired by a masterpiece. I encourage you to give Mazogs a play on a ZX81 emulator or, even better, a real ZX81.
