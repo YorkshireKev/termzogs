@@ -65,6 +65,20 @@ function drawCell(x, y, text, fg, bg, attrs, underlineStyle, underlineColor) {
         fg = temp
         use = true
     }
+
+    // Keep full-block wall cells on the terminal grid instead of relying on fallback glyph metrics.
+    if (text == "█" && fg != -1) {
+        bg = fg
+        fg = -1
+        text = " "
+        span.style.display = "inline-block"
+        span.style.width = "1ch"
+        span.style.height = "1.2em"
+        span.style.lineHeight = "1.2em"
+        span.style.verticalAlign = "top"
+        use = true
+    }
+
     if (fg != -1) { span.style.color = intToHex(fg); use = true }
     if (bg != -1) { span.style.backgroundColor = intToHex(bg); use = true }
     if (underlineStyle != 0) {
