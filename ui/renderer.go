@@ -27,10 +27,21 @@ type Renderer struct{}
 // Draw paints the local viewport and player status.
 func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 	screenWidth, screenHeight := screen.Size()
-	screen.SetStyle(blackBackgroundStyle())
+	backgroundStyle := blackBackgroundStyle()
+	if current != nil && current.State == game.StatePlaying && !current.ExpandedView {
+		backgroundStyle = localGameBackgroundStyle()
+	}
+	screen.SetStyle(backgroundStyle)
 	screen.Clear()
 	if screenWidth <= 0 || screenHeight <= 0 {
 		return
+	}
+	if current != nil && current.State == game.StatePlaying && !current.ExpandedView {
+		for y := 0; y < screenHeight; y++ {
+			for x := 0; x < screenWidth; x++ {
+				screen.SetContent(x, y, ' ', nil, backgroundStyle)
+			}
+		}
 	}
 	if DrawOverlay(screen, current) {
 		return
@@ -42,6 +53,10 @@ func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 		drawLocalViewport(screen, current)
 	}
 	DrawHUD(screen, current)
+}
+
+func localGameBackgroundStyle() tcell.Style {
+	return blackBackgroundStyle().Background(tcell.NewRGBColor(32, 32, 32))
 }
 
 func drawExpandedViewport(screen tcell.Screen, current *game.Game) {

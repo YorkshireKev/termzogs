@@ -345,14 +345,53 @@ func TestDrawAlwaysUsesBlackBackground(t *testing.T) {
 	}
 	defer screen.Fini()
 
-	current := &game.Game{State: game.StateTitle}
+	for _, state := range []game.GameState{game.StateTitle, game.StateInstructions} {
+		Renderer{}.Draw(screen, &game.Game{State: state})
+		screen.Show()
+		cells, _, _ := screen.GetContents()
+		for index, cell := range cells {
+			_, background, _ := cell.Style.Decompose()
+			if background != tcell.ColorBlack {
+				t.Errorf("state %v cell %d background = %v, want black", state, index, background)
+			}
+		}
+	}
+}
+
+func TestLocalGameUsesDarkBackgroundOutsideBlackMaze(t *testing.T) {
+	screen := tcell.NewSimulationScreen("")
+	if err := screen.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer screen.Fini()
+
+	current := &game.Game{
+		Maze:          &game.Maze{},
+		State:         game.StatePlaying,
+		Player:        game.Player{Position: game.Point{X: 10, Y: 10}, MaxEnergy: game.MaxEnergy, Energy: game.InitialEnergy},
+		StatusMessage: "Status text",
+	}
 	Renderer{}.Draw(screen, current)
 	screen.Show()
-	cells, _, _ := screen.GetContents()
-	for index, cell := range cells {
-		_, background, _ := cell.Style.Decompose()
-		if background != tcell.ColorBlack {
-			t.Errorf("cell %d background = %v, want black", index, background)
+	cells, width, height := screen.GetContents()
+	_, outerBackground, _ := cells[0].Style.Decompose()
+	_, wantOuterBackground, _ := localGameBackgroundStyle().Decompose()
+	if outerBackground != wantOuterBackground {
+		t.Errorf("outer background = %v, want dark gray %v", outerBackground, wantOuterBackground)
+	}
+
+	viewLeft := (width - ViewportWidth*ViewportCellWidth) / 2
+	viewTop := (height - 2 - ViewportHeight*ViewportCellHeight) / 2
+	playerCellX := viewLeft + (ViewportWidth/2)*ViewportCellWidth
+	playerCellY := viewTop + (ViewportHeight/2)*ViewportCellHeight
+	_, mazeBackground, _ := cells[playerCellY*width+playerCellX].Style.Decompose()
+	if mazeBackground != tcell.ColorBlack {
+		t.Errorf("maze background = %v, want black", mazeBackground)
+	}
+	for _, row := range []int{height - 2, height - 1} {
+		_, hudBackground, _ := cells[row*width].Style.Decompose()
+		if hudBackground != wantOuterBackground {
+			t.Errorf("HUD row %d background = %v, want dark gray %v", row, hudBackground, wantOuterBackground)
 		}
 	}
 }
