@@ -408,6 +408,33 @@ func TestWallUsesMatchingGrayForegroundAndBackground(t *testing.T) {
 	}
 }
 
+func TestMazeStartIsMarkedAsExitUnlessPlayerIsThere(t *testing.T) {
+	exit := game.Point{X: 2, Y: 2}
+	current := &game.Game{
+		Maze: &game.Maze{Start: exit},
+		Player: game.Player{
+			Position: game.Point{X: 3, Y: 2},
+		},
+	}
+
+	character, style := displayAt(current, exit, nil)
+	if character != 'E' {
+		t.Errorf("exit character = %q, want E", character)
+	}
+	foreground, _, _ := style.Decompose()
+	if foreground != tcell.ColorGreen {
+		t.Errorf("exit foreground = %v, want green", foreground)
+	}
+	if got := localCellPattern('E'); got != (cellPattern{"  +--+", "  |E |", "  |__|"}) {
+		t.Errorf("exit pattern = %v, want doorway", got)
+	}
+
+	current.Player.Position = exit
+	if character, _ := displayAt(current, exit, nil); character != '@' {
+		t.Errorf("exit occupied by player = %q, want player marker", character)
+	}
+}
+
 func TestDrawUsesCustomPatternInLocalView(t *testing.T) {
 	originalPatterns := localCellPatterns['M']
 	customPattern := cellPattern{"ABCDEF", "GHIJKL", "MNOPQR"}

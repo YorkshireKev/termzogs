@@ -148,7 +148,7 @@ func instructionsPageLines() []string {
 		"and escape back to the maze entrance. Beware of the Zogs that patrol the",
 		"corridors! Facing one without a weapon is a desperate gamble. Arm yourself",
 		"with a Sword to strike them down. Prisoners trapped in the walls will guide",
-		"you toward the treasure or back to the exit when you're escaping.",
+		"you toward the treasure or back to the green E exit when you're escaping.",
 		"Exploration takes a toll. Scavenge Food lying around the maze to keep your",
 		"energy up and avoid perishing. You can only hold one item at a time: either",
 		"a Sword to protect yourself or the Treasure to win the game.",

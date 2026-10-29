@@ -77,6 +77,14 @@ var localCellPatterns = map[rune][]cellPattern{
 			"██████",
 		},
 	},
+	// Exit
+	'E': {
+		{
+			"+----+",
+			"|EXIT|",
+			"+----+",
+		},
+	},
 	// Player
 	'@': {
 		{

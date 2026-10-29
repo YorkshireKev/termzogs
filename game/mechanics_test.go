@@ -173,6 +173,32 @@ func TestSwordSwapAndReturnToStartWins(t *testing.T) {
 	}
 }
 
+func TestReturningToStartWithoutTreasureShowsReminder(t *testing.T) {
+	current := NewGameWithSeed(29)
+	start := current.Maze.Start
+	if current.StatusMessage != "" || current.Player.Moves != 0 {
+		t.Fatal("new game should start without an exit reminder")
+	}
+
+	firstStep := Point{X: start.X, Y: start.Y + 1}
+	current.Maze.Tiles[firstStep.Y][firstStep.X] = Floor
+	current.Move(0, 1)
+	if current.StatusMessage != "" {
+		t.Fatalf("leaving the entrance showed message %q, want none", current.StatusMessage)
+	}
+
+	current.Move(0, -1)
+	if current.Player.Position != start || current.Player.Moves < 1 {
+		t.Fatalf("player position=%v moves=%d, want entrance after taking at least one step", current.Player.Position, current.Player.Moves)
+	}
+	if current.StatusMessage != "Get the treasure before exiting the Maze!" {
+		t.Fatalf("return-to-entrance message = %q", current.StatusMessage)
+	}
+	if current.State != StatePlaying {
+		t.Fatalf("state after returning without treasure = %v, want playing", current.State)
+	}
+}
+
 func TestDropItemLeavesItOnCurrentCell(t *testing.T) {
 	current := NewGameWithSeed(17)
 	current.Player.Position = Point{X: 2, Y: 2}

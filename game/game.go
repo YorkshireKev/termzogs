@@ -163,6 +163,8 @@ func (current *Game) Move(dx, dy int) {
 	if current.State == StatePlaying && current.Player.Position == current.Maze.Start && current.Player.HasTreasure {
 		current.State = StateVictory
 		current.SetStatusMessage("You escaped with the treasure!")
+	} else if current.State == StatePlaying && current.Player.Position == current.Maze.Start && !current.Player.HasTreasure && current.Player.Moves >= 1 {
+		current.SetStatusMessage("Get the treasure before exiting the Maze!")
 	}
 }
 

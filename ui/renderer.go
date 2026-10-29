@@ -200,6 +200,10 @@ func displayAt(current *game.Game, world game.Point, guidance map[game.Point]run
 		character = arrow
 		style = blackBackgroundStyle().Foreground(tcell.ColorAqua).Bold(true)
 	}
+	if world == current.Maze.Start {
+		character = 'E'
+		style = blackBackgroundStyle().Foreground(tcell.ColorGreen).Bold(true)
+	}
 	if world == current.Player.Position {
 		character = '@'
 		style = blackBackgroundStyle().Foreground(tcell.ColorYellow).Bold(true)
