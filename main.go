@@ -67,7 +67,9 @@ func run() error {
 				screen.Sync()
 				draw()
 			case *tcell.EventInterrupt:
-				return nil
+				if runtime.GOOS != "js" {
+					return nil
+				}
 			}
 		case <-ticker.C:
 			now := time.Now()
@@ -80,9 +82,10 @@ func run() error {
 
 // handleKey maps quit and movement keys to game actions.
 func handleKey(current *game.Game, event *tcell.EventKey) bool {
-	if runtime.GOOS == "js" && event.Key() == tcell.KeyEscape {
-		return false
-	}
+	return handleKeyForPlatform(current, event, runtime.GOOS == "js")
+}
+
+func handleKeyForPlatform(current *game.Game, event *tcell.EventKey, isWeb bool) bool {
 	if current.State == game.StateInstructions {
 		current.State = game.StateTitle
 		return false
@@ -95,14 +98,14 @@ func handleKey(current *game.Game, event *tcell.EventKey) bool {
 		}
 	}
 	if event.Key() == tcell.KeyCtrlC {
-		return true
+		return !isWeb
 	}
 	if current.State != game.StateTitle && (event.Rune() == 'q' || event.Rune() == 'Q' || event.Key() == tcell.KeyEscape) {
 		current.State = game.StateTitle
 		return false
 	}
 	if current.State == game.StateTitle && (event.Rune() == 'q' || event.Rune() == 'Q' || event.Key() == tcell.KeyEscape) {
-		return true
+		return !isWeb
 	}
 	if current.CombatInProgress() {
 		return false

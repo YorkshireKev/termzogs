@@ -4,6 +4,7 @@ package ui
 
 import (
 	"fmt"
+	"runtime"
 	"time"
 	"unicode/utf8"
 
@@ -29,7 +30,11 @@ func drawOverlayAt(screen tcell.Screen, current *game.Game, now time.Time) bool 
 	style := blackBackgroundStyle().Foreground(tcell.ColorWhite).Bold(true)
 	switch current.State {
 	case game.StateTitle:
-		lines = append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "v"+version.Number, "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
+		titlePrompt := "SPACE START  |  I INSTRUCTIONS"
+		if runtime.GOOS != "js" {
+			titlePrompt += "  |  Q QUIT"
+		}
+		lines = append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "v"+version.Number, "", "Find the treasure and return to the entrance.", "", titlePrompt)
 	case game.StateInstructions:
 		lines = instructionsPageLines()
 	case game.StateVictory:
@@ -39,14 +44,14 @@ func drawOverlayAt(screen tcell.Screen, current *game.Game, now time.Time) bool 
 			fmt.Sprintf("Steps Taken: %d", current.Player.Moves),
 			fmt.Sprintf("Zogs Slain: %d", current.ZogsSlain),
 			fmt.Sprintf("Remaining Energy: %d", current.Player.Energy),
-			"Press R to play again  |  Q to quit",
+			"Press R to play again  |  Q/ESC: title",
 		}
 	case game.StateDefeat:
 		style = blackBackgroundStyle().Foreground(tcell.ColorRed).Bold(true)
 		lines = []string{
 			defeatHeadline(current.DefeatCause),
 			fmt.Sprintf("Steps Taken: %d  |  Zogs Slain: %d", current.Player.Moves, current.ZogsSlain),
-			"R: restart  |  M: main menu  |  Q: quit",
+			"R: restart  |  M: main menu  |  Q/ESC: title",
 		}
 	case game.StatePlaying:
 		if !current.PendingSwap {

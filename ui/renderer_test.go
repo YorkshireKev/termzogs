@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -157,7 +158,11 @@ func TestTitleLogoIsRedAndSupportingTextIsWhite(t *testing.T) {
 	drawOverlayAt(screen, &game.Game{State: game.StateTitle}, time.Unix(0, 0))
 	screen.Show()
 	cells, width, height := screen.GetContents()
-	titleLines := append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "v"+version.Number, "", "Find the treasure and return to the entrance.", "", "SPACE START  |  I INSTRUCTIONS  |  Q QUIT")
+	titlePrompt := "SPACE START  |  I INSTRUCTIONS"
+	if runtime.GOOS != "js" {
+		titlePrompt += "  |  Q QUIT"
+	}
+	titleLines := append(termzogsTitleArt(), "©2026 By Kev Ellis - www.kevssite.com", "v"+version.Number, "", "Find the treasure and return to the entrance.", "", titlePrompt)
 	startY := height/2 - len(titleLines)/2
 	logoX := (width - titleArtWidth) / 2
 	logoCell := cells[(startY-1)*width+logoX]

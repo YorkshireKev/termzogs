@@ -131,6 +131,39 @@ func TestQuitKeysExitOnlyFromTitleScreen(t *testing.T) {
 	}
 }
 
+func TestWebQuitKeysDoNotExitFromTitleScreen(t *testing.T) {
+	for _, event := range []*tcell.EventKey{
+		tcell.NewEventKey(tcell.KeyRune, 'q', 0),
+		tcell.NewEventKey(tcell.KeyRune, 'Q', 0),
+		tcell.NewEventKey(tcell.KeyEscape, 0, 0),
+		tcell.NewEventKey(tcell.KeyCtrlC, 0, 0),
+	} {
+		current := game.NewTitleGame()
+		if handleKeyForPlatform(current, event, true) {
+			t.Errorf("key %v exited the web game from the title screen", event)
+		}
+		if current.State != game.StateTitle {
+			t.Errorf("key %v set state to %v, want title", event, current.State)
+		}
+	}
+}
+
+func TestWebQuitKeysReturnToTitleFromGameplay(t *testing.T) {
+	for _, event := range []*tcell.EventKey{
+		tcell.NewEventKey(tcell.KeyRune, 'q', 0),
+		tcell.NewEventKey(tcell.KeyRune, 'Q', 0),
+		tcell.NewEventKey(tcell.KeyEscape, 0, 0),
+	} {
+		current := game.NewGameWithSeed(28)
+		if handleKeyForPlatform(current, event, true) {
+			t.Errorf("key %v exited the web game instead of returning to title", event)
+		}
+		if current.State != game.StateTitle {
+			t.Errorf("key %v set state to %v, want title", event, current.State)
+		}
+	}
+}
+
 func TestCombatBlocksGameplayInputButAllowsReturningToTitle(t *testing.T) {
 	current := game.NewGameWithSeed(26)
 	current.Maze.Tiles[1][2] = game.Monster

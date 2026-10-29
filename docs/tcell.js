@@ -212,14 +212,5 @@ document.addEventListener("paste", e => {
 
 const go = new Go();
 WebAssembly.instantiateStreaming(fetch(wasmFilePath), go.importObject).then((result) => {
-        return go.run(result.instance)
-    }).then(() => {
-        const referrer = document.referrer
-        if (referrer && new URL(referrer).href !== window.location.href) {
-            window.location.assign(referrer)
-        } else if (window.history.length > 1) {
-            window.history.back()
-        } else {
-            window.location.assign("https://kevssite.com")
-        }
+    return go.run(result.instance)
 });
