@@ -215,8 +215,11 @@ WebAssembly.instantiateStreaming(fetch(wasmFilePath), go.importObject).then((res
         return go.run(result.instance)
     }).then(() => {
         const referrer = document.referrer
-        const destination = referrer && new URL(referrer).href !== window.location.href
-            ? referrer
-            : "https://kevssite.com"
-        window.location.assign(destination)
+        if (referrer && new URL(referrer).href !== window.location.href) {
+            window.location.assign(referrer)
+        } else if (window.history.length > 1) {
+            window.history.back()
+        } else {
+            window.location.assign("https://kevssite.com")
+        }
 });
