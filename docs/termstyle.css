@@ -44,6 +44,14 @@ text-align: center;
  -ms-user-select: none;
 }
 
+#terminal .terminal-background-cell {
+ display: inline-block;
+ width: 1ch;
+ height: 1.2em;
+ line-height: 1.2em;
+ vertical-align: top;
+}
+
 #info {
   text-align: center;
   margin: 10;

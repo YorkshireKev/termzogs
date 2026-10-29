@@ -79,6 +79,10 @@ function drawCell(x, y, text, fg, bg, attrs, underlineStyle, underlineColor) {
         use = true
     }
 
+    if (bg === 0x202020) {
+        span.classList.add("terminal-background-cell")
+    }
+
     if (fg != -1) { span.style.color = intToHex(fg); use = true }
     if (bg != -1) { span.style.backgroundColor = intToHex(bg); use = true }
     if (underlineStyle != 0) {

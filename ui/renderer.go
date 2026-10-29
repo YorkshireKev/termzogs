@@ -56,7 +56,8 @@ func (Renderer) Draw(screen tcell.Screen, current *game.Game) {
 }
 
 func localGameBackgroundStyle() tcell.Style {
-	return blackBackgroundStyle().Background(tcell.NewRGBColor(32, 32, 32))
+	background := tcell.NewRGBColor(32, 32, 32)
+	return tcell.StyleDefault.Foreground(background).Background(background)
 }
 
 func drawExpandedViewport(screen tcell.Screen, current *game.Game) {

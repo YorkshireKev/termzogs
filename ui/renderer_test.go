@@ -374,10 +374,16 @@ func TestLocalGameUsesDarkBackgroundOutsideBlackMaze(t *testing.T) {
 	Renderer{}.Draw(screen, current)
 	screen.Show()
 	cells, width, height := screen.GetContents()
-	_, outerBackground, _ := cells[0].Style.Decompose()
-	_, wantOuterBackground, _ := localGameBackgroundStyle().Decompose()
+	outerForeground, outerBackground, _ := cells[0].Style.Decompose()
+	wantOuterForeground, wantOuterBackground, _ := localGameBackgroundStyle().Decompose()
+	if outerForeground != wantOuterForeground {
+		t.Errorf("outer foreground = %v, want dark gray %v", outerForeground, wantOuterForeground)
+	}
 	if outerBackground != wantOuterBackground {
 		t.Errorf("outer background = %v, want dark gray %v", outerBackground, wantOuterBackground)
+	}
+	if outerForeground != outerBackground {
+		t.Errorf("outer foreground %v does not match background %v", outerForeground, outerBackground)
 	}
 
 	viewLeft := (width - ViewportWidth*ViewportCellWidth) / 2
@@ -425,8 +431,8 @@ func TestMazeStartIsMarkedAsExitUnlessPlayerIsThere(t *testing.T) {
 	if foreground != tcell.ColorGreen {
 		t.Errorf("exit foreground = %v, want green", foreground)
 	}
-	if got := localCellPattern('E'); got != (cellPattern{"  +--+", "  |E |", "  |__|"}) {
-		t.Errorf("exit pattern = %v, want doorway", got)
+	if got := localCellPattern('E'); got != (cellPattern{"+----+", "|EXIT|", "+----+"}) {
+		t.Errorf("exit pattern = %v, want exit marker", got)
 	}
 
 	current.Player.Position = exit
