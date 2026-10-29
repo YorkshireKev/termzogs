@@ -208,7 +208,7 @@ func tileAppearance(tile game.Tile) (rune, tcell.Style) {
 	case game.Food:
 		return '%', blackBackgroundStyle().Foreground(tcell.ColorGreen).Bold(true)
 	default:
-		return '█', blackBackgroundStyle().Foreground(tcell.ColorGray)
+		return '█', blackBackgroundStyle().Foreground(tcell.ColorGray).Background(tcell.ColorGray)
 	}
 }
 

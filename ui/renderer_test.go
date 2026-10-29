@@ -357,6 +357,18 @@ func TestDrawAlwaysUsesBlackBackground(t *testing.T) {
 	}
 }
 
+func TestWallUsesMatchingGrayForegroundAndBackground(t *testing.T) {
+	character, style := tileAppearance(game.Wall)
+	foreground, background, _ := style.Decompose()
+
+	if character != '█' {
+		t.Errorf("wall character = %q, want full block", character)
+	}
+	if foreground != tcell.ColorGray || background != tcell.ColorGray {
+		t.Errorf("wall colors = foreground %v, background %v; want both gray", foreground, background)
+	}
+}
+
 func TestDrawUsesCustomPatternInLocalView(t *testing.T) {
 	originalPatterns := localCellPatterns['M']
 	customPattern := cellPattern{"ABCDEF", "GHIJKL", "MNOPQR"}
