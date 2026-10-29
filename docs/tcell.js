@@ -214,5 +214,9 @@ const go = new Go();
 WebAssembly.instantiateStreaming(fetch(wasmFilePath), go.importObject).then((result) => {
         return go.run(result.instance)
     }).then(() => {
-        window.location.href = "https://github.com/YorkshireKev/termzogs"
+        const referrer = document.referrer
+        const destination = referrer && new URL(referrer).href !== window.location.href
+            ? referrer
+            : "https://kevssite.com"
+        window.location.assign(destination)
 });
